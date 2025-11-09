@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block title %}คำสั่งซื้อ #{{ order.id }} - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">หน้าแรก</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'order_list' %}">คำสั่งซื้อของฉัน</a></li>
+            <li class="breadcrumb-item active">คำสั่งซื้อ #{{ order.id }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Order Summary -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-receipt"></i> รายการสั่งซื้อ #{{ order.id }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>สินค้า</th>
+                                    <th>ราคา</th>
+                                    <th>จำนวน</th>
+                                    <th>รวม</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if order.pet.image %}
+                                                <img src="{{ order.pet.image.url }}" alt="{{ order.pet.name }}" 
+                                                     class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" 
+                                                     style="width: 60px; height: 60px;">
+                                                    <i class="fas fa-paw text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ order.pet.name }}</h6>
+                                                <small class="text-muted">{{ order.pet.category.name }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>฿{{ order.pet.price|floatformat:2 }}</td>
+                                    <td>{{ order.quantity }}</td>
+                                    <td>฿{{ order.total_price|floatformat:2 }}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>ยอดรวมทั้งสิ้น</strong></td>
+                                    <td><strong class="text-primary">฿{{ order.total_price|floatformat:2 }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-truck"></i> ข้อมูลการจัดส่ง
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>ที่อยู่ในการจัดส่ง</h6>
+                            <p>
+                                {{ user.get_full_name }}<br>
+                                {{ user.email }}<br>
+                                {{ user.phone|default:"-" }}<br>
+                                ที่อยู่: กำลังพัฒนา...
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>วิธีการจัดส่ง</h6>
+                            <p>จัดส่งด่วน (1-3 วันทำการ)</p>
+                            <p class="text-success">จัดส่งฟรี</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Order Status -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> สถานะคำสั่งซื้อ
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span class="badge bg-{{ order.status == 'completed'|yesno:'success,primary,warning' }} fs-6">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <!-- Order Timeline -->
+                    <div class="timeline">
+                        <div class="timeline-item {{ order.status != 'pending'|yesno:'completed,' }}">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6>สั่งซื้อแล้ว</h6>
+                                <small>{{ order.order_date|date:"d/m/Y H:i" }}</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item {{ order.status == 'completed'|yesno:'completed,' }}">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6>จัดส่งแล้ว</h6>
+                                <small>{{ order.updated_at|date:"d/m/Y H:i" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Actions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">การดำเนินการ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'order_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left"></i> กลับไปหน้ารายการสั่งซื้อ
+                        </a>
+                        {% if order.status == 'pending' %}
+                            <button class="btn btn-outline-danger" onclick="cancelOrder({{ order.id }})">
+                                <i class="fas fa-times"></i> ยกเลิกคำสั่งซื้อ
+                            </button>
+                        {% endif %}
+                        <button class="btn btn-outline-secondary" onclick="window.print()">
+                            <i class="fas fa-print"></i> พิมพ์ใบสั่งซื้อ
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Support -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-headset"></i> ช่วยเหลือ
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>มีคำถามเกี่ยวกับคำสั่งซื้อนี้?</p>
+                    <div class="d-grid gap-2">
+                        <a href="tel:021234567" class="btn btn-outline-primary">
+                            <i class="fas fa-phone"></i> โทร 02-123-4567
+                        </a>
+                        <a href="mailto:support@petstore.com" class="btn btn-outline-success">
+                            <i class="fas fa-envelope"></i> อีเมล support@petstore.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #dee2e6;
+    border: 3px solid white;
+}
+
+.timeline-item.completed .timeline-marker {
+    background-color: #28a745;
+}
+
+.timeline-content {
+    padding-bottom: 10px;
+}
+
+.timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: -21px;
+    top: 20px;
+    bottom: -10px;
+    width: 2px;
+    background-color: #dee2e6;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function cancelOrder(orderId) {
+    if (confirm('คุณแน่ใจว่าต้องการยกเลิกคำสั่งซื้อนี้?')) {
+        // ในอนาคตจะเชื่อมกับ API เพื่อยกเลิกคำสั่งซื้อ
+        alert('ระบบกำลังพัฒนา การยกเลิกคำสั่งซื้อจะสามารถทำได้ในอนาคต');
+    }
+}
+</script>
+{% endblock %}

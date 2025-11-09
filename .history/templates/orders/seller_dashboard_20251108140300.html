@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Seller Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Seller Dashboard</h2>
+    
+    <!-- สถิติ -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h4>{{ total_orders }}</h4>
+                    <p>คำสั่งซื้อทั้งหมด</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h4>{{ pending_orders }}</h4>
+                    <p>รอดำเนินการ</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h4>{{ completed_orders }}</h4>
+                    <p>สำเร็จ</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- รายการคำสั่งซื้อ -->
+    <div class="card">
+        <div class="card-header">
+            <h5>คำสั่งซื้อของฉัน</h5>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>สัตว์เลี้ยง</th>
+                        <th>ลูกค้า</th>
+                        <th>จำนวน</th>
+                        <th>สถานะ</th>
+                        <th>การดำเนินการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.pet.name }}</td>
+                        <td>{{ order.user.get_full_name }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td>
+                            <span class="badge bg-{% if order.status == 'pending' %}warning{% elif order.status == 'completed' %}success{% else %}danger{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if order.status == 'pending' %}
+                            <form method="post" action="{% url 'update_order_status' order.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="status" value="completed">
+                                <button type="submit" class="btn btn-success btn-sm">ทำเครื่องหมายว่าสำเร็จ</button>
+                            </form>
+                            {% endif %}
+                            <a href="{% url 'order_detail' order.id %}" class="btn btn-info btn-sm">ดูรายละเอียด</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">ไม่มีคำสั่งซื้อ</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

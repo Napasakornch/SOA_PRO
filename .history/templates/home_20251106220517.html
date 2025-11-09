@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">ยินดีต้อนรับสู่ Pet Store!</h1>
+    <p class="lead">ร้านขายสัตว์เลี้ยงออนไลน์</p>
+    <hr class="my-4">
+    <p>เริ่มต้นการค้นหาสัตว์เลี้ยงของคุณได้เลย</p>
+    <a class="btn btn-primary btn-lg" href="{% url 'pet_list' %}" role="button">ดูสัตว์เลี้ยงทั้งหมด</a>
+</div>
+{% endblock %}

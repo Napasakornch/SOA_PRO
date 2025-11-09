@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}หมวดหมู่สัตว์เลี้ยง - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <div class="hero-section bg-gradient-primary rounded-3 p-5 text-white">
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="fas fa-paw me-3"></i>หมวดหมู่สัตว์เลี้ยง
+                </h1>
+                <p class="lead mb-4">ค้นพบสัตว์เลี้ยงน่ารักตามประเภทที่คุณชื่นชอบ</p>
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="input-group input-group-lg">
+                            <input type="text" class="form-control" placeholder="ค้นหาหมวดหมู่..." id="categorySearch">
+                            <button class="btn btn-light" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Development Notice -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-tools fa-2x me-3"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="alert-heading mb-2">ระบบหมวดหมู่กำลังพัฒนา</h5>
+                        <p class="mb-0">คุณสามารถจัดการหมวดหมู่ผ่าน Admin Panel ได้เลยตอนนี้</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Cards Grid -->
+    <div class="row g-4 mb-5">
+        <!-- Management Card -->
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-hover">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="card-title mb-0 d-flex align-items-center">
+                        <i class="fas fa-cogs me-2"></i>
+                        จัดการหมวดหมู่
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-list-alt fa-3x text-primary mb-3"></i>
+                        <p class="text-muted">สำหรับผู้ดูแลระบบ</p>
+                    </div>
+                    <div class="d-grid gap-3">
+                        <a href="/admin/pets/category/" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center">
+                            <i class="fas fa-list me-2"></i>
+                            ดูหมวดหมู่ทั้งหมด
+                        </a>
+                        <a href="/admin/pets/category/add/" class="btn btn-success btn-lg d-flex align-items-center justify-content-center">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            เพิ่มหมวดหมู่ใหม่
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Information Card -->
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-hover">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="card-title mb-0 d-flex align-items-center">
+                        <i class="fas fa-code me-2"></i>
+                        ข้อมูลหมวดหมู่ API
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-database fa-3x text-success mb-3"></i>
+                        <p class="text-muted">ทดสอบ API หมวดหมู่</p>
+                    </div>
+                    <div class="bg-dark text-light p-4 rounded-3">
+                        <code class="small">
+                            <span class="text-info"># ดูหมวดหมู่ทั้งหมดผ่าน API</span><br>
+                            <span class="text-warning">GET</span> /api/pets/categories/<br><br>
+                            
+                            <span class="text-info"># ตัวอย่างคำสั่ง curl</span><br>
+                            <span class="text-light">curl http://localhost:8000/api/pets/categories/</span><br><br>
+                            
+                            <span class="text-info"># ตัวอย่าง Response</span><br>
+                            <span class="text-light">{</span><br>
+                            <span class="text-light">&nbsp;&nbsp;"id": 1,</span><br>
+                            <span class="text-light">&nbsp;&nbsp;"name": "สุนัข",</span><br>
+                            <span class="text-light">&nbsp;&nbsp;"description": "สัตว์เลี้ยงยอดนิยม"</span><br>
+                            <span class="text-light">}</span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 bg-light">
+                <div class="card-body text-center py-4">
+                    <h4 class="mb-3">ต้องการดูสัตว์เลี้ยงทั้งหมด?</h4>
+                    <p class="text-muted mb-4">ไปที่หน้ารายการสัตว์เลี้ยงเพื่อดูสัตว์เลี้ยงน่ารักทั้งหมดที่มี</p>
+                    <a href="{% url 'pet_list' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-paw me-2"></i>
+                        ดูสัตว์เลี้ยงทั้งหมด
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.shadow-hover {
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.shadow-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+.input-group-lg .form-control {
+    border-radius: 15px 0 0 15px;
+}
+
+.input-group-lg .btn {
+    border-radius: 0 15px 15px 0;
+}
+
+code {
+    font-family: 'Courier New', monospace;
+    line-height: 1.6;
+}
+
+.text-info {
+    color: #17a2b8 !important;
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('categorySearch');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            // สามารถเพิ่มฟังก์ชันการค้นหาได้ในอนาคต
+            console.log('Searching for:', this.value);
+        });
+    }
+});
+</script>
+{% endblock %}

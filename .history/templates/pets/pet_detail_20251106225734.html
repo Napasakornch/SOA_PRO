@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ pet.name }} - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">หน้าแรก</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'pet_list' %}">สัตว์เลี้ยง</a></li>
+            <li class="breadcrumb-item active">{{ pet.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if pet.image %}
+                        <img src="{{ pet.image.url }}" alt="{{ pet.name }}" class="img-fluid rounded" style="max-height: 400px;">
+                    {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 300px;">
+                            <i class="fas fa-paw fa-5x text-muted"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="h3">{{ pet.name }}</h1>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-primary">{{ pet.category.name }}</span>
+                        <!-- แก้ไขบรรทัดนี้ -->
+                        <span class="badge {% if pet.gender == 'M' %}bg-info{% else %}bg-success{% endif %}">
+                            {% if pet.gender == 'M' %}ชาย{% else %}หญิง{% endif %}
+                        </span>
+                        <!-- แก้ไขบรรทัดนี้ -->
+                        <span class="badge {% if pet.is_available %}bg-success{% else %}bg-danger{% endif %}">
+                            {% if pet.is_available %}มีสินค้า{% else %}หมดสต็อก{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <h2 class="text-primary">฿{{ pet.price|floatformat:2 }}</h2>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>รายละเอียด</h5>
+                        <p class="text-muted">{{ pet.description }}</p>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {% if pet.is_available %}
+                            {% if user.is_authenticated %}
+                                <button class="btn btn-primary btn-lg" onclick="addToCart({{ pet.id }})">
+                                    <i class="fas fa-cart-plus"></i> เพิ่มลงตะกร้า
+                                </button>
+                                <a href="{% url 'cart' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-shopping-cart"></i> ดูตะกร้าสินค้า
+                                </a>
+                            {% else %}
+                                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบเพื่อสั่งซื้อ
+                                </a>
+                                <a href="{% url 'register' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-user-plus"></i> สมัครสมาชิก
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <button class="btn btn-secondary btn-lg" disabled>
+                                <i class="fas fa-times-circle"></i> สินค้าหมด
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Additional Info -->
+                    <div class="mt-4">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <i class="fas fa-shipping-fast text-primary"></i>
+                                <small class="d-block">จัดส่งฟรี</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="fas fa-shield-alt text-primary"></i>
+                                <small class="d-block">รับประกันสุขภาพ</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="fas fa-headset text-primary"></i>
+                                <small class="d-block">บริการ 24/7</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Details -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> ข้อมูลสัตว์เลี้ยง
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <td width="30%"><strong>ชื่อ</strong></td>
+                            <td>{{ pet.name }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ประเภท</strong></td>
+                            <td>{{ pet.category.name }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>เพศ</strong></td>
+                            <td>
+                                {% if pet.gender == 'M' %}
+                                    <span class="badge bg-info">ชาย</span>
+                                {% else %}
+                                    <span class="badge bg-success">หญิง</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>ราคา</strong></td>
+                            <td><strong class="text-primary">฿{{ pet.price|floatformat:2 }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>สถานะ</strong></td>
+                            <td>
+                                {% if pet.is_available %}
+                                    <span class="badge bg-success">มีสินค้า</span>
+                                {% else %}
+                                    <span class="badge bg-danger">หมดสต็อก</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>เพิ่มเมื่อ</strong></td>
+                            <td>{{ pet.created_at|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>อัพเดทล่าสุด</strong></td>
+                            <td>{{ pet.updated_at|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Pets (Placeholder) -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h4>สัตว์เลี้ยงอื่นๆ ในหมวดหมู่ {{ pet.category.name }}</h4>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 
+                ระบบแนะนำสัตว์เลี้ยงที่เกี่ยวข้องกำลังพัฒนา
+            </div>
+            <div class="text-center">
+                <a href="{% url 'pet_list' %}?category={{ pet.category.id }}" class="btn btn-primary">
+                    <i class="fas fa-list"></i> ดูสัตว์เลี้ยงทั้งหมดในหมวดหมู่นี้
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function addToCart(petId) {
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const existingItem = cart.find(item => item.petId === petId);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push({ petId: petId, quantity: 1 });
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        
+        // Show success message with Bootstrap toast
+        showToast('เพิ่มลงตะกร้าเรียบร้อยแล้ว!', 'success');
+    }
+    
+    function showToast(message, type) {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i>${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        // Add to toast container
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        toastContainer.appendChild(toast);
+        
+        // Initialize and show toast
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Remove toast after hide
+        toast.addEventListener('hidden.bs.toast', function () {
+            toast.remove();
+        });
+    }
+    
+    // Initialize cart count
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartCount();
+    });
+</script>
+{% endblock %}

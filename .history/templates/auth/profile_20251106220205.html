@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}โปรไฟล์ - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>โปรไฟล์ผู้ใช้</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">ข้อมูลส่วนตัว</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>ชื่อผู้ใช้:</strong> {{ user.username }}</p>
+                    <p><strong>อีเมล:</strong> {{ user.email }}</p>
+                    <p><strong>ชื่อ:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                    <p><strong>เบอร์โทร:</strong> {{ user.phone|default:"ยังไม่ได้ตั้งค่า" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

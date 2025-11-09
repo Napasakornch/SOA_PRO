@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block title %}หมวดหมู่สัตว์เลี้ยง - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold text-primary">
+                <i class="fas fa-paw me-2"></i>หมวดหมู่สัตว์เลี้ยง
+            </h1>
+            <p class="lead text-muted">เลือกดูสัตว์เลี้ยงตามประเภทที่คุณสนใจ</p>
+            <hr class="my-4">
+        </div>
+    </div>
+
+    <!-- Development Notice -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle fa-2x me-3"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="alert-heading mb-2">ระบบหมวดหมู่กำลังพัฒนา</h5>
+                        <p class="mb-0">
+                            คุณสามารถจัดการหมวดหมู่ผ่าน 
+                            <a href="/admin/pets/category/" class="alert-link fw-bold">Admin Panel</a> 
+                            ได้เลยตอนนี้
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Grid -->
+    <div class="row mb-5">
+        <!-- Dogs Category -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card category-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="category-icon mb-3">
+                        <i class="fas fa-dog fa-3x text-warning"></i>
+                    </div>
+                    <h4 class="card-title fw-bold text-dark mb-3">สุนัข</h4>
+                    <p class="card-text text-muted mb-4">
+                        สุนัขพันธุ์ต่างๆ น่ารัก ขี้เล่น และซื่อสัตย์ 
+                        เหมาะสำหรับทุกครอบครัว
+                    </p>
+                    <div class="category-stats mb-3">
+                        <span class="badge bg-primary rounded-pill">15 ตัว</span>
+                        <span class="badge bg-success rounded-pill ms-2">พร้อมขาย</span>
+                    </div>
+                    <a href="{% url 'pet_list' %}?category=1" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>ดูสุนัขทั้งหมด
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cats Category -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card category-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="category-icon mb-3">
+                        <i class="fas fa-cat fa-3x text-info"></i>
+                    </div>
+                    <h4 class="card-title fw-bold text-dark mb-3">แมว</h4>
+                    <p class="card-text text-muted mb-4">
+                        แมวพันธุ์น่ารัก อ่อนโยน และเป็นมิตร 
+                        เหมาะกับการเลี้ยงในคอนโด
+                    </p>
+                    <div class="category-stats mb-3">
+                        <span class="badge bg-primary rounded-pill">12 ตัว</span>
+                        <span class="badge bg-success rounded-pill ms-2">พร้อมขาย</span>
+                    </div>
+                    <a href="{% url 'pet_list' %}?category=2" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-eye me-1"></i>ดูแมวทั้งหมด
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Birds Category -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card category-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="category-icon mb-3">
+                        <i class="fas fa-dove fa-3x text-success"></i>
+                    </div>
+                    <h4 class="card-title fw-bold text-dark mb-3">นก</h4>
+                    <p class="card-text text-muted mb-4">
+                        นกสายพันธุ์ต่างๆ สวยงาม มีเสียงร้องไพเราะ 
+                        เพิ่มความสดชื่นให้บ้าน
+                    </p>
+                    <div class="category-stats mb-3">
+                        <span class="badge bg-primary rounded-pill">8 ตัว</span>
+                        <span class="badge bg-success rounded-pill ms-2">พร้อมขาย</span>
+                    </div>
+                    <a href="{% url 'pet_list' %}?category=3" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-eye me-1"></i>ดูนกทั้งหมด
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Small Animals Category -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card category-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="category-icon mb-3">
+                        <i class="fas fa-kiwi-bird fa-3x text-secondary"></i>
+                    </div>
+                    <h4 class="card-title fw-bold text-dark mb-3">สัตว์ฟาร์ม</h4>
+                    <p class="card-text text-muted mb-4">
+                        กระต่าย หนู แฮมสเตอร์ น่ารัก ขนปุกปุย 
+                        เลี้ยงง่ายไม่เปลืองพื้นที่
+                    </p>
+                    <div class="category-stats mb-3">
+                        <span class="badge bg-primary rounded-pill">6 ตัว</span>
+                        <span class="badge bg-success rounded-pill ms-2">พร้อมขาย</span>
+                    </div>
+                    <a href="{% url 'pet_list' %}?category=4" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-eye me-1"></i>ดูสัตว์ฟาร์มทั้งหมด
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fish Category -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card category-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="category-icon mb-3">
+                        <i class="fas fa-fish fa-3x text-primary"></i>
+                    </div>
+                    <h4 class="card-title fw-bold text-dark mb-3">ปลา</h4>
+                    <p class="card-text text-muted mb-4">
+                        ปลาสวยงามหลากหลายสายพันธุ์ สีสันสดใส 
+                        เพิ่มความสวยงามให้ตู้ปลา
+                    </p>
+                    <div class="category-stats mb-3">
+                        <span class="badge bg-primary rounded-pill">10 ตัว</span>
+                        <span class="badge bg-success rounded-pill ms-2">พร้อมขาย</span>
+                    </div>
+                    <a href="{% url 'pet_list' %}?category=5" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>ดูปลาทั้งหมด
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reptiles Category -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card category-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="category-icon mb-3">
+                        <i class="fas fa-dragon fa-3x text-danger"></i>
+                    </div>
+                    <h4 class="card-title fw-bold text-dark mb-3">สัตว์เลื้อยคลาน</h4>
+                    <p class="card-text text-muted mb-4">
+                        งู กิ้งก่า เต่า สัตว์เลื้อยคลานน่าสนใจ 
+                        สำหรับผู้ชื่นชอบสัตว์พิเศษ
+                    </p>
+                    <div class="category-stats mb-3">
+                        <span class="badge bg-primary rounded-pill">5 ตัว</span>
+                        <span class="badge bg-success rounded-pill ms-2">พร้อมขาย</span>
+                    </div>
+                    <a href="{% url 'pet_list' %}?category=6" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-eye me-1"></i>ดูสัตว์เลื้อยคลานทั้งหมด
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Management Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0 d-flex align-items-center">
+                        <i class="fas fa-tools me-2"></i>
+                        การจัดการหมวดหมู่ (สำหรับผู้ดูแลระบบ)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-grid gap-2">
+                                <a href="/admin/pets/category/" class="btn btn-primary">
+                                    <i class="fas fa-list me-1"></i>
+                                    ดูและจัดการหมวดหมู่ทั้งหมด
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-grid gap-2">
+                                <a href="/admin/pets/category/add/" class="btn btn-success">
+                                    <i class="fas fa-plus-circle me-1"></i>
+                                    เพิ่มหมวดหมู่ใหม่
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            การจัดการหมวดหมู่จะช่วยให้การจัดระเบียบสัตว์เลี้ยงเป็นระบบมากขึ้น
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.category-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-color: #007bff;
+}
+
+.category-icon {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.category-card:hover .category-icon {
+    opacity: 1;
+}
+
+.card-title {
+    font-size: 1.25rem;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

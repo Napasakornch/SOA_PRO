@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}เข้าสู่ระบบ - Pet Store{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">เข้าสู่ระบบ</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">ชื่อผู้ใช้</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">รหัสผ่าน</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">เข้าสู่ระบบ</button>
+                </form>
+                <div class="text-center mt-3">
+                    <p>ยังไม่มีบัญชี? <a href="{% url 'register' %}">สมัครสมาชิกที่นี่</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

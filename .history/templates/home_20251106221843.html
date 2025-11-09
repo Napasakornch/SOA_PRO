@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}หน้าแรก - Pet Store{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">ยินดีต้อนรับสู่ Pet Store</h1>
+                <p class="lead">ค้นหาสัตว์เลี้ยงน่ารักๆ ที่พร้อมจะเป็นส่วนหนึ่งในครอบครัวของคุณ</p>
+                <div class="mt-4">
+                    <a href="{% url 'pet_list' %}" class="btn btn-light btn-lg me-3">
+                        <i class="fas fa-search"></i> ค้นหาสัตว์เลี้ยง
+                    </a>
+                    <a href="{% url 'categories' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-list"></i> ดูหมวดหมู่
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="row">
+                    <div class="col-6">
+                        <i class="fas fa-dog" style="font-size: 80px; opacity: 0.8; margin-bottom: 20px;"></i>
+                        <h5>สุนัข</h5>
+                    </div>
+                    <div class="col-6">
+                        <i class="fas fa-cat" style="font-size: 80px; opacity: 0.8; margin-bottom: 20px;"></i>
+                        <h5>แมว</h5>
+                    </div>
+                    <div class="col-6">
+                        <i class="fas fa-dove" style="font-size: 80px; opacity: 0.8; margin-bottom: 20px;"></i>
+                        <h5>นก</h5>
+                    </div>
+                    <div class="col-6">
+                        <i class="fas fa-fish" style="font-size: 80px; opacity: 0.8; margin-bottom: 20px;"></i>
+                        <h5>ปลา</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">ทำไมต้องเลือกเรา</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-heartbeat fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">สัตว์เลี้ยงสุขภาพดี</h5>
+                        <p class="card-text">สัตว์เลี้ยงทุกตัวมาจากฟาร์มที่ได้มาตรฐาน ผ่านการตรวจสุขภาพอย่างเคร่งครัดจากสัตวแพทย์</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-shipping-fast fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">จัดส่งรวดเร็ว</h5>
+                        <p class="card-text">จัดส่งปลอดภัยถึงบ้านทั่วประเทศ ด้วยระบบขนส่งพิเศษสำหรับสัตว์เลี้ยง</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">บริการหลังการขาย</h5>
+                        <p class="card-text">ทีมสัตวแพทย์พร้อมให้คำปรึกษาตลอด 24 ชั่วโมง ในช่วง 7 วันแรก</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Stats -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <h3 class="text-primary fw-bold">500+</h3>
+                <p>สัตว์เลี้ยงน่ารัก</p>
+            </div>
+            <div class="col-md-3">
+                <h3 class="text-primary fw-bold">1,000+</h3>
+                <p>ลูกค้าที่ไว้วางใจ</p>
+            </div>
+            <div class="col-md-3">
+                <h3 class="text-primary fw-bold">50+</h3>
+                <p>สายพันธุ์สัตว์เลี้ยง</p>
+            </div>
+            <div class="col-md-3">
+                <h3 class="text-primary fw-bold">24/7</h3>
+                <p>บริการตลอดเวลา</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="container text-center">
+        <h2>พร้อมพบกับสัตว์เลี้ยงตัวใหม่ของคุณแล้วหรือยัง?</h2>
+        <p class="lead mb-4">เริ่มต้นการค้นหาสัตว์เลี้ยงในฝันของคุณได้เลยตอนนี้</p>
+        <a href="{% url 'pet_list' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-paw"></i> ดูสัตว์เลี้ยงทั้งหมด
+        </a>
+    </div>
+</section>
+{% endblock %}

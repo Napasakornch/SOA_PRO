@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}โปรไฟล์ - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Profile Card -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-circle"></i> ข้อมูลส่วนตัว
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-user fa-4x text-primary"></i>
+                    </div>
+                    <h4>{{ user.get_full_name|default:user.username }}</h4>
+                    <p class="text-muted">สมาชิก Pet Store</p>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="fas fa-user me-2"></i>
+                        <strong>ชื่อผู้ใช้:</strong> {{ user.username }}
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-envelope me-2"></i>
+                        <strong>อีเมล:</strong> {{ user.email|default:"ยังไม่ได้ตั้งค่า" }}
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-phone me-2"></i>
+                        <strong>เบอร์โทร:</strong> {{ user.phone|default:"ยังไม่ได้ตั้งค่า" }}
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-calendar me-2"></i>
+                        <strong>สมัครสมาชิกเมื่อ:</strong> {{ user.date_joined|date:"d/m/Y" }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-shopping-bag fa-2x text-primary mb-3"></i>
+                            <h5>คำสั่งซื้อของฉัน</h5>
+                            <p>ดูประวัติการสั่งซื้อทั้งหมด</p>
+                            <a href="{% url 'order_list' %}" class="btn btn-outline-primary">ดูคำสั่งซื้อ</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-shopping-cart fa-2x text-success mb-3"></i>
+                            <h5>ตะกร้าสินค้า</h5>
+                            <p>จัดการสินค้าในตะกร้า</p>
+                            <a href="{% url 'cart' %}" class="btn btn-outline-success">ดูตะกร้า</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history"></i> กิจกรรมล่าสุด
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        ระบบกำลังพัฒนา ข้อมูลกิจกรรมจะแสดงที่นี่ในอนาคต
+                    </div>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <i class="fas fa-user-plus text-success"></i>
+                            สมัครสมาชิกเมื่อ {{ user.date_joined|date:"d/m/Y" }}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-sign-in-alt text-primary"></i>
+                            เข้าสู่ระบบล่าสุดเมื่อ {{ user.last_login|date:"d/m/Y H:i"|default:"-" }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

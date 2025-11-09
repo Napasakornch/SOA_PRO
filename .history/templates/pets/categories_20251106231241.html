@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}หมวดหมู่สัตว์เลี้ยง - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="fas fa-list"></i> หมวดหมู่สัตว์เลี้ยง</h2>
+            <p class="text-muted">เลือกดูสัตว์เลี้ยงตามประเภทที่คุณสนใจ</p>
+        </div>
+    </div>
+
+    <div class="alert alert-info">
+        <div class="d-flex">
+            <div class="me-3">
+                <i class="fas fa-info-circle fa-2x"></i>
+            </div>
+            <div>
+                <h5 class="alert-heading">ระบบหมวดหมู่กำลังพัฒนา</h5>
+                <p class="mb-0">
+                    คุณสามารถจัดการหมวดหมู่ผ่าน 
+                    <a href="/admin/pets/category/" class="alert-link">Admin Panel</a> 
+                    ได้เลยตอนนี้
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Management -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cogs"></i> จัดการหมวดหมู่
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>สำหรับผู้ดูแลระบบ</p>
+                    <div class="d-grid gap-2">
+                        <a href="/admin/pets/category/" class="btn btn-primary">
+                            <i class="fas fa-list"></i> ดูหมวดหมู่ทั้งหมด
+                        </a>
+                        <a href="/admin/pets/category/add/" class="btn btn-success">
+                            <i class="fas fa-plus"></i> เพิ่มหมวดหมู่ใหม่
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-database"></i> ข้อมูลหมวดหมู่
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>ทดสอบ API หมวดหมู่:</p>
+                    <div class="bg-dark text-light p-3 rounded small">
+                        <code>
+                            # ดูหมวดหมู่ทั้งหมดผ่าน API<br>
+                            GET /api/pets/categories/<br><br>
+                            
+                            # ตัวอย่างคำสั่ง curl<br>
+                            curl http://localhost:8000/api/pets/categories/
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}หน้าแรก - Pet Store{% endblock %}
+
+{% block content %}
+<div class="jumbotron bg-light p-5 rounded">
+    <h1 class="display-4">ยินดีต้อนรับสู่ Pet Store!</h1>
+    <p class="lead">ร้านขายสัตว์เลี้ยงออนไลน์ที่คุณสามารถไว้ใจได้</p>
+    <hr class="my-4">
+    <p>ค้นหาสัตว์เลี้ยงน่ารักๆ ที่พร้อมจะเป็นส่วนหนึ่งในครอบครัวของคุณ</p>
+    <a class="btn btn-primary btn-lg" href="{% url 'pet_list' %}" role="button">
+        ดูสัตว์เลี้ยงทั้งหมด
+    </a>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-dog fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">สัตว์เลี้ยงคุณภาพ</h5>
+                <p class="card-text">สัตว์เลี้ยงสุขภาพดีจากฟาร์มที่ได้มาตรฐาน</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-shipping-fast fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">จัดส่งรวดเร็ว</h5>
+                <p class="card-text">จัดส่งถึงบ้านทั่วประเทศภายใน 1-3 วัน</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">บริการหลังการขาย</h5>
+                <p class="card-text">ทีมงานพร้อมให้คำปรึกษาทุกปัญหา</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

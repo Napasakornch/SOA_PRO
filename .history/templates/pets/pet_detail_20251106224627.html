@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ pet.name }} - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">หน้าแรก</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'pet_list' %}">สัตว์เลี้ยง</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'categories' %}">{{ pet.category.name }}</a></li>
+            <li class="breadcrumb-item active">{{ pet.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Product Images -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if pet.image %}
+                        <img src="{{ pet.image.url }}" alt="{{ pet.name }}" class="img-fluid rounded" style="max-height: 400px;">
+                    {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 300px;">
+                            <i class="fas fa-paw fa-5x text-muted"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Additional Images (placeholder) -->
+            <div class="row mt-3">
+                <div class="col-3">
+                    <div class="card">
+                        <div class="card-body text-center p-2">
+                            <i class="fas fa-image text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="card">
+                        <div class="card-body text-center p-2">
+                            <i class="fas fa-image text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="card">
+                        <div class="card-body text-center p-2">
+                            <i class="fas fa-image text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="card">
+                        <div class="card-body text-center p-2">
+                            <i class="fas fa-image text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="h3">{{ pet.name }}</h1>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-primary">{{ pet.category.name }}</span>
+                        <span class="badge bg-{{ pet.gender == 'M'|yesno:'info,success' }}">
+                            {{ pet.gender == 'M'|yesno:'ชาย,หญิง' }}
+                        </span>
+                        <span class="badge bg-{{ pet.is_available|yesno:'success,danger' }}">
+                            {{ pet.is_available|yesno:'มีสินค้า,หมดสต็อก' }}
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <h2 class="text-primary">฿{{ pet.price|floatformat:2 }}</h2>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>รายละเอียด</h5>
+                        <p class="text-muted">{{ pet.description }}</p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2">
+                        {% if pet.is_available %}
+                            {% if user.is_authenticated %}
+                                <button class="btn btn-primary btn-lg" onclick="addToCart({{ pet.id }})">
+                                    <i class="fas fa-cart-plus"></i> เพิ่มลงตะกร้า
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="buyNow({{ pet.id }})">
+                                    <i class="fas fa-bolt"></i> สั่งซื้อทันที
+                                </button>
+                            {% else %}
+                                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบเพื่อสั่งซื้อ
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <button class="btn btn-secondary btn-lg" disabled>
+                                <i class="fas fa-times-circle"></i> สินค้าหมด
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Additional Info -->
+                    <div class="mt-4">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <i class="fas fa-shipping-fast text-primary"></i>
+                                <small class="d-block">จัดส่งฟรี</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="fas fa-shield-alt text-primary"></i>
+                                <small class="d-block">รับประกันสุขภาพ</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="fas fa-headset text-primary"></i>
+                                <small class="d-block">บริการ 24/7</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Details Tabs -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="petTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">
+                                รายละเอียดเพิ่มเติม
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="care-tab" data-bs-toggle="tab" data-bs-target="#care" type="button" role="tab">
+                                วิธีการดูแล
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping" type="button" role="tab">
+                                การจัดส่ง
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="petTabsContent">
+                        <div class="tab-pane fade show active" id="details" role="tabpanel">
+                            <h5>ข้อมูลสัตว์เลี้ยง</h5>
+                            <table class="table">
+                                <tr>
+                                    <td width="30%"><strong>ชื่อ</strong></td>
+                                    <td>{{ pet.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ประเภท</strong></td>
+                                    <td>{{ pet.category.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>เพศ</strong></td>
+                                    <td>{{ pet.gender == 'M'|yesno:'ชาย,หญิง' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>สถานะ</strong></td>
+                                    <td>
+                                        <span class="badge bg-{{ pet.is_available|yesno:'success,danger' }}">
+                                            {{ pet.is_available|yesno:'มีสินค้า,หมดสต็อก' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>เพิ่มโดย</strong></td>
+                                    <td>{{ pet.created_by.get_full_name|default:pet.created_by.username }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="care" role="tabpanel">
+                            <h5>คำแนะนำการดูแล</h5>
+                            <p>สัตว์เลี้ยงทุกตัวของเรามาจากฟาร์มที่ได้มาตรฐานและผ่านการตรวจสุขภาพจากสัตวแพทย์</p>
+                            <ul>
+                                <li>ควรพาไปตรวจสุขภาพหลังรับเลี้ยงภายใน 7 วัน</li>
+                                <li>ให้อาหารที่เหมาะสมกับสายพันธุ์และอายุ</li>
+                                <li>พาออกกำลังกายอย่างสม่ำเสมอ</li>
+                                <li>ทำความสะอาดที่อยู่อาศัยเป็นประจำ</li>
+                            </ul>
+                        </div>
+                        <div class="tab-pane fade" id="shipping" role="tabpanel">
+                            <h5>นโยบายการจัดส่ง</h5>
+                            <ul>
+                                <li>จัดส่งฟรีทั่วประเทศ</li>
+                                <li>ระยะเวลาจัดส่ง 1-3 วันทำการ</li>
+                                <li>จัดส่งโดยพนักงานที่มีประสบการณ์</li>
+                                <li>มีบริการติดตามสถานะการจัดส่ง</li>
+                                <li>รับประกันความปลอดภัยระหว่างการขนส่ง</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h4>สัตว์เลี้ยงที่เกี่ยวข้อง</h4>
+            <div class="row" id="related-pets">
+                <!-- จะโหลดด้วย JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function addToCart(petId) {
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const existingItem = cart.find(item => item.petId === petId);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push({ petId: petId, quantity: 1 });
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        
+        // Show success message
+        alert('เพิ่มลงตะกร้าเรียบร้อยแล้ว!');
+    }
+    
+    function buyNow(petId) {
+        addToCart(petId);
+        window.location.href = "{% url 'cart' %}";
+    }
+    
+    // Load related pets
+    document.addEventListener('DOMContentLoaded', function() {
+        loadRelatedPets();
+    });
+    
+    async function loadRelatedPets() {
+        try {
+            const response = await fetch(`/api/pets/pets/?category={{ pet.category.id }}&limit=4`);
+            const pets = await response.json();
+            
+            const container = document.getElementById('related-pets');
+            if (pets.length > 0) {
+                container.innerHTML = pets.map(pet => `
+                    <div class="col-md-3 mb-4">
+                        <div class="card h-100">
+                            <img src="${pet.image || '/static/images/default-pet.jpg'}" 
+                                 class="card-img-top pet-image" alt="${pet.name}">
+                            <div class="card-body">
+                                <h6 class="card-title">${pet.name}</h6>
+                                <p class="card-text">
+                                    <span class="badge bg-secondary">${pet.category_name}</span>
+                                </p>
+                                <p class="card-text">
+                                    <strong class="text-primary">฿${parseFloat(pet.price).toLocaleString()}</strong>
+                                </p>
+                            </div>
+                            <div class="card-footer">
+                                <a href="/pets/${pet.id}/" class="btn btn-primary btn-sm">ดูรายละเอียด</a>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="col-12 text-center"><p>ไม่มีสัตว์เลี้ยงที่เกี่ยวข้อง</p></div>';
+            }
+        } catch (error) {
+            console.error('Error loading related pets:', error);
+        }
+    }
+</script>
+{% endblock %}

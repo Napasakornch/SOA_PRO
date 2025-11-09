@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block title %}หมวดหมู่สัตว์เลี้ยง - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold text-primary">
+                <i class="fas fa-paw me-2"></i>หมวดหมู่สัตว์เลี้ยง
+            </h1>
+            <p class="lead text-muted">เลือกดูสัตว์เลี้ยงตามประเภทที่คุณสนใจ</p>
+            <hr class="my-4">
+        </div>
+    </div>
+
+    <!-- Category Grid -->
+    <div class="row mb-5">
+        {% for category in categories %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card category-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="category-icon mb-3">
+                        {% if "สุนัข" in category.name or "Dog" in category.name or "dog" in category.name %}
+                        <i class="fas fa-dog fa-3x text-warning"></i>
+                        {% elif "แมว" in category.name or "Cat" in category.name or "cat" in category.name %}
+                        <i class="fas fa-cat fa-3x text-info"></i>
+                        {% elif "นก" in category.name or "Bird" in category.name or "bird" in category.name %}
+                        <i class="fas fa-dove fa-3x text-success"></i>
+                        {% elif "ปลา" in category.name or "Fish" in category.name or "fish" in category.name %}
+                        <i class="fas fa-fish fa-3x text-primary"></i>
+                        {% elif "สัตว์เลื้อยคลาน" in category.name or "Reptile" in category.name %}
+                        <i class="fas fa-dragon fa-3x text-danger"></i>
+                        {% elif "สัตว์ฟาร์ม" in category.name or "Farm" in category.name %}
+                        <i class="fas fa-kiwi-bird fa-3x text-secondary"></i>
+                        {% elif "สัตว์น้ำ" in category.name or "Aquatic" in category.name %}
+                        <i class="fas fa-water fa-3x text-info"></i>
+                        {% elif "หนู" in category.name or "Rodent" in category.name %}
+                        <i class="fas fa-otter fa-3x text-brown"></i>
+                        {% else %}
+                        <i class="fas fa-paw fa-3x text-muted"></i>
+                        {% endif %}
+                    </div>
+                    <h4 class="card-title fw-bold text-dark mb-3">{{ category.name }}</h4>
+                    
+                    {% if category.description %}
+                    <p class="card-text text-muted mb-4">
+                        {{ category.description|truncatewords:15 }}
+                    </p>
+                    {% else %}
+                    <p class="card-text text-muted mb-4">
+                        สัตว์เลี้ยง{{ category.name }}น่ารักและเป็นมิตร
+                    </p>
+                    {% endif %}
+                    
+                    <!-- Category Stats -->
+                    <div class="category-stats mb-3">
+                        {% with pet_count=category.pet_set.count %}
+                        <span class="badge bg-primary rounded-pill">{{ pet_count }} ชนิด</span>
+                        
+                        {% with available_pets=category.pet_set.filter.is_available=True.stock_quantity__gt=0.count %}
+                        {% if available_pets > 0 %}
+                        <span class="badge bg-success rounded-pill ms-2">{{ available_pets }} พร้อมขาย</span>
+                        {% else %}
+                        <span class="badge bg-secondary rounded-pill ms-2">暫無สินค้า</span>
+                        {% endif %}
+                        {% endwith %}
+                        {% endwith %}
+                    </div>
+                    
+                    <a href="{% url 'pet_list' %}?category={{ category.id }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>ดู{{ category.name }}ทั้งหมด
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <!-- Empty State -->
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">ยังไม่มีหมวดหมู่สัตว์เลี้ยง</h4>
+                <p class="text-muted mb-4">เริ่มต้นโดยการเพิ่มหมวดหมู่แรกของคุณ</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="/admin/pets/category/add/" class="btn btn-success">
+                        <i class="fas fa-plus-circle me-1"></i> เพิ่มหมวดหมู่แรก
+                    </a>
+                    <a href="/admin/pets/pet/add/" class="btn btn-primary">
+                        <i class="fas fa-paw me-1"></i> เพิ่มสัตว์เลี้ยง
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Admin Management Section -->
+    {% if user.is_staff or user.is_admin %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0 d-flex align-items-center">
+                        <i class="fas fa-tools me-2"></i>
+                        การจัดการหมวดหมู่ (สำหรับผู้ดูแลระบบ)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="d-grid gap-2">
+                                <a href="/admin/pets/category/" class="btn btn-primary">
+                                    <i class="fas fa-list me-1"></i>
+                                    ดูหมวดหมู่ทั้งหมด
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-grid gap-2">
+                                <a href="/admin/pets/category/add/" class="btn btn-success">
+                                    <i class="fas fa-plus-circle me-1"></i>
+                                    เพิ่มหมวดหมู่ใหม่
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-grid gap-2">
+                                <a href="/admin/pets/pet/add/" class="btn btn-info">
+                                    <i class="fas fa-paw me-1"></i>
+                                    เพิ่มสัตว์เลี้ยง
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Category Management -->
+                    {% if categories %}
+                    <div class="mt-4">
+                        <h6 class="text-muted mb-3">จัดการหมวดหมู่ด่วน:</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for category in categories|slice:":6" %}
+                            <a href="/admin/pets/category/{{ category.id }}/change/" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-edit me-1"></i> {{ category.name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Call to Action -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white">
+                <div class="card-body text-center py-5">
+                    <h3 class="card-title mb-3">พร้อมที่จะค้นหาสัตว์เลี้ยงน่ารักแล้วหรือยัง?</h3>
+                    <p class="card-text mb-4">ค้นพบสัตว์เลี้ยงที่สมบูรณ์แบบสำหรับคุณและครอบครัว</p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{% url 'pet_list' %}" class="btn btn-light btn-lg">
+                            <i class="fas fa-search me-2"></i>ดูสัตว์เลี้ยงทั้งหมด
+                        </a>
+                        <a href="{% url 'categories' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-sync me-2"></i>รีเฟรชหมวดหมู่
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.category-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-color: #007bff;
+}
+
+.category-icon {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.category-card:hover .category-icon {
+    opacity: 1;
+}
+
+.card-title {
+    font-size: 1.25rem;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.text-brown {
+    color: #8B4513 !important;
+}
+</style>
+{% endblock %}

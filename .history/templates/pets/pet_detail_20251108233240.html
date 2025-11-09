@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ pet.name }} - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">หน้าแรก</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'pet_list' %}">สัตว์เลี้ยง</a></li>
+            <li class="breadcrumb-item active">{{ pet.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if pet.image_display %}
+                        <img src="{{ pet.image_display }}" alt="{{ pet.name }}" 
+                             class="img-fluid rounded" style="max-height: 400px; object-fit: cover;"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='">
+                    {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 300px;">
+                            <i class="fas fa-paw fa-5x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Image Source Indicator -->
+                    {% if pet.image_url and not pet.image %}
+                    <div class="mt-2">
+                        <span class="badge bg-warning text-dark">
+                            <i class="fas fa-link"></i> รูปภาพจาก URL
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="h3">{{ pet.name }}</h1>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-primary">{{ pet.category.name }}</span>
+                        <span class="badge {% if pet.gender == 'M' %}bg-info{% else %}bg-pink{% endif %}">
+                            {% if pet.gender == 'M' %}ชาย{% else %}หญิง{% endif %}
+                        </span>
+                        
+                        <!-- Stock Status Badge -->
+                        {% if pet.stock_quantity > 10 %}
+                        <span class="badge bg-success">
+                            <i class="fas fa-boxes"></i> มีสต็อก
+                        </span>
+                        {% elif pet.stock_quantity > 0 %}
+                        <span class="badge bg-warning text-dark">
+                            <i class="fas fa-exclamation-triangle"></i> สต็อกต่ำ
+                        </span>
+                        {% else %}
+                        <span class="badge bg-danger">
+                            <i class="fas fa-times-circle"></i> สินค้าหมด
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <h2 class="text-primary">฿{{ pet.price|floatformat:2 }}</h2>
+                    </div>
+
+                    <!-- Stock Information -->
+                    <div class="mb-3">
+                        {% if pet.stock_quantity > 0 %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>จำนวนคงเหลือ:</strong> {{ pet.stock_quantity }} ตัว
+                        </div>
+                        {% else %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <strong>สินค้าหมดชั่วคราว</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>รายละเอียด</h5>
+                        <p class="text-muted">{{ pet.description }}</p>
+                    </div>
+
+                    <!-- Purchase Section -->
+                    <div class="mb-4">
+                        {% if pet.stock_quantity > 0 %}
+                            {% if user.is_authenticated %}
+                                <div class="row align-items-center mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">จำนวน:</label>
+                                        <div class="input-group input-group-lg">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity()">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input type="number" class="form-control text-center" 
+                                                   id="quantity" value="1" min="1" max="{{ pet.stock_quantity }}">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity()">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">สูงสุด {{ pet.stock_quantity }} ตัว</small>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-primary btn-lg" onclick="addToCartWithQuantity({{ pet.id }}, '{{ pet.name }}', {{ pet.stock_quantity }})">
+                                                <i class="fas fa-cart-plus"></i> เพิ่มลงตะกร้า
+                                            </button>
+                                            <a href="{% url 'cart' %}" class="btn btn-outline-primary">
+                                                <i class="fas fa-shopping-cart"></i> ดูตะกร้าสินค้า
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบเพื่อสั่งซื้อ
+                                    </a>
+                                    <a href="{% url 'register' %}" class="btn btn-outline-primary">
+                                        <i class="fas fa-user-plus"></i> สมัครสมาชิก
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <button class="btn btn-secondary btn-lg w-100" disabled>
+                                <i class="fas fa-times-circle"></i> สินค้าหมด
+                            </button>
+                            {% if user.is_seller or user.is_admin %}
+                            <div class="mt-2">
+                                <a href="/admin/pets/pet/{{ pet.id }}/change/" class="btn btn-warning btn-sm w-100">
+                                    <i class="fas fa-edit"></i> จัดการสต็อก
+                                </a>
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Additional Info -->
+                    <div class="mt-4">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <i class="fas fa-shipping-fast text-primary"></i>
+                                <small class="d-block">จัดส่งฟรี</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="fas fa-shield-alt text-primary"></i>
+                                <small class="d-block">รับประกันสุขภาพ</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="fas fa-headset text-primary"></i>
+                                <small class="d-block">บริการ 24/7</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Details -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> ข้อมูลสัตว์เลี้ยง
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <td width="30%"><strong>ชื่อ</strong></td>
+                            <td>{{ pet.name }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ประเภท</strong></td>
+                            <td>{{ pet.category.name }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>เพศ</strong></td>
+                            <td>
+                                {% if pet.gender == 'M' %}
+                                    <span class="badge bg-info">ชาย</span>
+                                {% else %}
+                                    <span class="badge bg-pink">หญิง</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>ราคา</strong></td>
+                            <td><strong class="text-primary">฿{{ pet.price|floatformat:2 }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>สถานะสต็อก</strong></td>
+                            <td>
+                                {% if pet.stock_quantity > 10 %}
+                                    <span class="badge bg-success">มีสต็อก ({{ pet.stock_quantity }} ตัว)</span>
+                                {% elif pet.stock_quantity > 0 %}
+                                    <span class="badge bg-warning text-dark">สต็อกต่ำ ({{ pet.stock_quantity }} ตัว)</span>
+                                {% else %}
+                                    <span class="badge bg-danger">สินค้าหมด</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>สถานะการขาย</strong></td>
+                            <td>
+                                {% if pet.is_available %}
+                                    <span class="badge bg-success">พร้อมขาย</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">ปิดการขาย</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>เพิ่มเมื่อ</strong></td>
+                            <td>{{ pet.created_at|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>อัพเดทล่าสุด</strong></td>
+                            <td>{{ pet.updated_at|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        {% if user.is_seller or user.is_admin %}
+                        <tr>
+                            <td><strong>จัดการ</strong></td>
+                            <td>
+                                <a href="/admin/pets/pet/{{ pet.id }}/change/" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> แก้ไขข้อมูล
+                                </a>
+                                <a href="/admin/pets/pet/" class="btn btn-info btn-sm">
+                                    <i class="fas fa-cog"></i> จัดการสัตว์เลี้ยง
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Pets -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h4>สัตว์เลี้ยงอื่นๆ ในหมวดหมู่ {{ pet.category.name }}</h4>
+            {% if related_pets %}
+            <div class="row">
+                {% for related_pet in related_pets %}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        {% if related_pet.image_display %}
+                            <img src="{{ related_pet.image_display }}" class="card-img-top pet-image" 
+                                 alt="{{ related_pet.name }}" style="height: 200px; object-fit: cover;"
+                                 onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='">
+                        {% else %}
+                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
+                                <i class="fas fa-paw fa-3x text-muted"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Stock Status -->
+                        <div class="position-absolute top-0 end-0 m-2">
+                            {% if related_pet.stock_quantity > 0 %}
+                            <span class="badge bg-success">{{ related_pet.stock_quantity }} ตัว</span>
+                            {% else %}
+                            <span class="badge bg-danger">หมด</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="card-body">
+                            <h6 class="card-title">{{ related_pet.name }}</h6>
+                            <p class="card-text">
+                                <span class="badge bg-secondary">{{ related_pet.category.name }}</span>
+                            </p>
+                            <p class="card-text">
+                                <strong class="text-primary">฿{{ related_pet.price|floatformat:2 }}</strong>
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'pet_detail' related_pet.id %}" class="btn btn-primary btn-sm w-100">ดูรายละเอียด</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 
+                ไม่มีสัตว์เลี้ยงอื่นในหมวดหมู่นี้
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-pink {
+    background-color: #e83e8c !important;
+}
+.input-group .form-control {
+    border-left: none;
+    border-right: none;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function increaseQuantity() {
+        const quantityInput = document.getElementById('quantity');
+        const maxQuantity = parseInt('{{ pet.stock_quantity }}');
+        let currentQuantity = parseInt(quantityInput.value);
+        
+        if (currentQuantity < maxQuantity) {
+            quantityInput.value = currentQuantity + 1;
+        } else {
+            showToast(`ไม่สามารถเพิ่มได้! สินค้ามีเพียง ${maxQuantity} ตัว`, 'warning');
+        }
+    }
+    
+    function decreaseQuantity() {
+        const quantityInput = document.getElementById('quantity');
+        let currentQuantity = parseInt(quantityInput.value);
+        
+        if (currentQuantity > 1) {
+            quantityInput.value = currentQuantity - 1;
+        }
+    }
+    
+    function addToCartWithQuantity(petId, petName, maxQuantity) {
+        const quantityInput = document.getElementById('quantity');
+        const quantity = parseInt(quantityInput.value);
+        
+        if (quantity < 1) {
+            showToast('กรุณาเลือกจำนวนอย่างน้อย 1 ตัว', 'warning');
+            return;
+        }
+        
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const existingItem = cart.find(item => item.petId === petId);
+        
+        // Check if adding would exceed stock
+        const currentQuantity = existingItem ? existingItem.quantity : 0;
+        const totalAfterAdd = currentQuantity + quantity;
+        
+        if (totalAfterAdd > maxQuantity) {
+            showToast(`ไม่สามารถเพิ่มได้! ${petName} เหลือเพียง ${maxQuantity} ตัว (ในตะกร้าของคุณมีแล้ว ${currentQuantity} ตัว)`, 'warning');
+            return;
+        }
+        
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            cart.push({ 
+                petId: petId, 
+                quantity: quantity,
+                petName: petName,
+                maxQuantity: maxQuantity,
+                addedAt: new Date().toISOString()
+            });
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        
+        // Show success toast
+        showToast(`เพิ่ม ${petName} จำนวน ${quantity} ตัวลงตะกร้าเรียบร้อย! (ทั้งหมด ${totalAfterAdd}/${maxQuantity})`, 'success');
+        
+        // Reset quantity to 1
+        quantityInput.value = 1;
+    }
+    
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        
+        // Update cart badge if exists
+        const cartBadge = document.querySelector('.cart-badge');
+        if (cartBadge) {
+            cartBadge.textContent = totalItems;
+            cartBadge.style.display = totalItems > 0 ? 'inline' : 'none';
+        }
+    }
+    
+    function showToast(message, type) {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-2"></i>${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        // Add to toast container
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        toastContainer.appendChild(toast);
+        
+        // Initialize and show toast
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Remove toast after hide
+        toast.addEventListener('hidden.bs.toast', function () {
+            toast.remove();
+        });
+    }
+
+    // Initialize cart count on page load
+    document.addEventListener('DOMContentLoaded', updateCartCount);
+    
+    // Validate quantity input
+    document.addEventListener('DOMContentLoaded', function() {
+        const quantityInput = document.getElementById('quantity');
+        if (quantityInput) {
+            quantityInput.addEventListener('change', function() {
+                const maxQuantity = parseInt('{{ pet.stock_quantity }}');
+                let value = parseInt(this.value);
+                
+                if (isNaN(value) || value < 1) {
+                    this.value = 1;
+                } else if (value > maxQuantity) {
+                    this.value = maxQuantity;
+                    showToast(`เลือกได้สูงสุด ${maxQuantity} ตัว`, 'warning');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

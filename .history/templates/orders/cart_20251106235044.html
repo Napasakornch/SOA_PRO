@@ -1,0 +1,349 @@
+{% extends 'base.html' %}
+
+{% block title %}ตะกร้าสินค้า - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">หน้าแรก</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'pet_list' %}">สัตว์เลี้ยง</a></li>
+            <li class="breadcrumb-item active">ตะกร้าสินค้า</li>
+        </ol>
+    </nav>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="fas fa-shopping-cart"></i> ตะกร้าสินค้า</h2>
+            <p class="text-muted">สินค้าในตะกร้าของคุณ</p>
+        </div>
+    </div>
+
+    <!-- Cart Items -->
+    <div class="row">
+        <div class="col-md-8">
+            {% if pets_in_cart %}
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list"></i> รายการสินค้าในตะกร้า ({{ cart_count }} ชิ้น)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for item in pets_in_cart %}
+                    <div class="cart-item border-bottom pb-3 mb-3">
+                        <div class="row align-items-center">
+                            <!-- Product Image -->
+                            <div class="col-md-2">
+                                {% if item.pet.image_display %}
+                                    <img src="{{ item.pet.image_display }}" 
+                                         class="img-fluid rounded" 
+                                         alt="{{ item.pet.name }}"
+                                         style="height: 80px; width: 80px; object-fit: cover;"
+                                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2Y4ZjhmOCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='">
+                                {% else %}
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                         style="height: 80px; width: 80px;">
+                                        <i class="fas fa-paw text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Product Info -->
+                            <div class="col-md-4">
+                                <h6 class="mb-1">{{ item.pet.name }}</h6>
+                                <p class="mb-1 text-muted small">
+                                    <span class="badge bg-secondary">{{ item.pet.category.name }}</span>
+                                    <span class="badge {% if item.pet.gender == 'M' %}bg-info{% else %}bg-pink{% endif %}">
+                                        {% if item.pet.gender == 'M' %}ชาย{% else %}หญิง{% endif %}
+                                    </span>
+                                </p>
+                                <p class="mb-0 text-primary fw-bold">฿{{ item.pet.price|floatformat:2 }}</p>
+                            </div>
+                            
+                            <!-- Quantity Controls -->
+                            <div class="col-md-3">
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-outline-secondary btn-sm quantity-btn" 
+                                            onclick="updateQuantity({{ item.pet.id }}, -1)">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span class="mx-3 fw-bold" id="quantity-{{ item.pet.id }}">
+                                        {{ item.quantity }}
+                                    </span>
+                                    <button class="btn btn-outline-secondary btn-sm quantity-btn" 
+                                            onclick="updateQuantity({{ item.pet.id }}, 1)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Item Total & Actions -->
+                            <div class="col-md-3 text-end">
+                                <div class="mb-2">
+                                    <strong class="text-primary">฿{{ item.total_price|floatformat:2 }}</strong>
+                                </div>
+                                <button class="btn btn-outline-danger btn-sm" 
+                                        onclick="removeFromCart({{ item.pet.id }})">
+                                    <i class="fas fa-trash"></i> ลบ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <!-- Empty Cart State -->
+            <div class="card text-center">
+                <div class="card-body py-5">
+                    <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">ตะกร้าสินค้าว่าง</h4>
+                    <p class="text-muted mb-4">ยังไม่มีสินค้าในตะกร้าของคุณ</p>
+                    <a href="{% url 'pet_list' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paw"></i> ไปเลือกสัตว์เลี้ยง
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-md-4">
+            {% if pets_in_cart %}
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-receipt"></i> สรุปคำสั่งซื้อ
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>จำนวนสินค้า:</span>
+                        <span>{{ cart_count }} ชิ้น</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>ค่าจัดส่ง:</span>
+                        <span class="text-success">ฟรี</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>ยอดรวมทั้งสิ้น:</strong>
+                        <strong class="text-primary fs-5">฿{{ total_price|floatformat:2 }}</strong>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success btn-lg" onclick="checkout()">
+                            <i class="fas fa-credit-card"></i> สั่งซื้อเลย
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="clearCart()">
+                            <i class="fas fa-trash"></i> ล้างตะกร้า
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Help Section -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> ข้อมูลเพิ่มเติม
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-shipping-fast text-primary"></i> การจัดส่ง</h6>
+                        <p class="small text-muted mb-0">จัดส่งฟรีทั่วประเทศ ภายใน 1-3 วันทำการ</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><i class="fas fa-shield-alt text-primary"></i> การรับประกัน</h6>
+                        <p class="small text-muted mb-0">รับประกันสุขภาพสัตว์เลี้ยง 7 วัน</p>
+                    </div>
+                    <div>
+                        <h6><i class="fas fa-headset text-primary"></i> ช่วยเหลือ</h6>
+                        <p class="small text-muted mb-0">ติดต่อ: 02-123-4567</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Shopping -->
+    {% if pets_in_cart %}
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{% url 'pet_list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> เลือกสัตว์เลี้ยงเพิ่ม
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Hidden form for checkout -->
+<form id="checkout-form" method="POST" action="{% url 'create_order_from_cart' %}" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="cart" id="checkout-cart-data">
+</form>
+
+<style>
+.bg-pink {
+    background-color: #e83e8c !important;
+}
+.cart-item {
+    transition: background-color 0.2s ease;
+}
+.cart-item:hover {
+    background-color: #f8f9fa;
+}
+.quantity-btn {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.sticky-top {
+    position: sticky;
+    z-index: 100;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Get current cart from localStorage
+    function getCart() {
+        return JSON.parse(localStorage.getItem('cart') || '[]');
+    }
+    
+    // Save cart to localStorage and reload page with cart data
+    function saveCart(cart) {
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        
+        // Reload page with cart data in URL
+        const cartQuery = encodeURIComponent(JSON.stringify(cart));
+        window.location.href = `{% url 'cart' %}?cart=${cartQuery}`;
+    }
+    
+    // Update quantity
+    function updateQuantity(petId, change) {
+        let cart = getCart();
+        const itemIndex = cart.findIndex(item => item.petId === petId);
+        
+        if (itemIndex !== -1) {
+            const newQuantity = cart[itemIndex].quantity + change;
+            
+            if (newQuantity <= 0) {
+                // Remove item if quantity becomes 0 or less
+                cart.splice(itemIndex, 1);
+                showToast('ลบสินค้าออกจากตะกร้าเรียบร้อย', 'warning');
+            } else {
+                // Update quantity
+                cart[itemIndex].quantity = newQuantity;
+                showToast('อัพเดทจำนวนเรียบร้อยแล้ว', 'success');
+            }
+            
+            saveCart(cart);
+        }
+    }
+    
+    // Remove item from cart
+    function removeFromCart(petId) {
+        if (confirm('คุณแน่ใจว่าต้องการลบสินค้านี้ออกจากตะกร้า?')) {
+            let cart = getCart();
+            cart = cart.filter(item => item.petId !== petId);
+            saveCart(cart);
+            showToast('ลบสินค้าออกจากตะกร้าเรียบร้อย', 'warning');
+        }
+    }
+    
+    // Clear entire cart
+    function clearCart() {
+        if (confirm('คุณแน่ใจว่าต้องการล้างตะกร้าทั้งหมด?')) {
+            localStorage.removeItem('cart');
+            showToast('ล้างตะกร้าเรียบร้อยแล้ว', 'info');
+            setTimeout(() => {
+                window.location.href = "{% url 'cart' %}";
+            }, 1000);
+        }
+    }
+    
+    // Checkout process
+    function checkout() {
+        const cart = getCart();
+        
+        if (cart.length === 0) {
+            showToast('ตะกร้าสินค้าว่าง', 'warning');
+            return;
+        }
+        
+        if (confirm('คุณแน่ใจว่าต้องการสั่งซื้อสินค้าในตะกร้า?')) {
+            // Set cart data to hidden form and submit
+            document.getElementById('checkout-cart-data').value = JSON.stringify(cart);
+            document.getElementById('checkout-form').submit();
+        }
+    }
+    
+    // Toast notification
+    function showToast(message, type) {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${getToastIcon(type)} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        toastContainer.appendChild(toast);
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        toast.addEventListener('hidden.bs.toast', function () {
+            toast.remove();
+        });
+    }
+    
+    // Get appropriate icon for toast type
+    function getToastIcon(type) {
+        switch(type) {
+            case 'success': return 'check-circle';
+            case 'warning': return 'exclamation-triangle';
+            case 'danger': return 'times-circle';
+            case 'info': return 'info-circle';
+            default: return 'info-circle';
+        }
+    }
+    
+    // Initialize page - send cart data to server when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartCount();
+        
+        // If coming from another page without cart data, send current cart
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.has('cart')) {
+            const currentCart = getCart();
+            if (currentCart.length > 0) {
+                const cartQuery = encodeURIComponent(JSON.stringify(currentCart));
+                window.location.href = `{% url 'cart' %}?cart=${cartQuery}`;
+            }
+        }
+    });
+</script>
+{% endblock %}

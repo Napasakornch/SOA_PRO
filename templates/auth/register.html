@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}สมัครสมาชิก - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="card-title mb-0 text-center">
+                        <i class="fas fa-user-plus"></i> สมัครสมาชิก
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">
+                                    <i class="fas fa-id-card"></i> ชื่อ
+                                </label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" 
+                                       placeholder="กรอกชื่อ" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">
+                                    <i class="fas fa-id-card"></i> นามสกุล
+                                </label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" 
+                                       placeholder="กรอกนามสกุล" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user"></i> ชื่อผู้ใช้
+                            </label>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   placeholder="กรอกชื่อผู้ใช้" required>
+                            <div class="form-text">ชื่อผู้ใช้ต้องไม่ซ้ำกับผู้ใช้รายอื่น</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope"></i> อีเมล
+                            </label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="กรอกอีเมล" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">
+                                <i class="fas fa-phone"></i> เบอร์โทร
+                            </label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   placeholder="กรอกเบอร์โทร">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock"></i> รหัสผ่าน
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   placeholder="กรอกรหัสผ่าน" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password2" class="form-label">
+                                <i class="fas fa-lock"></i> ยืนยันรหัสผ่าน
+                            </label>
+                            <input type="password" class="form-control" id="password2" name="password2" 
+                                   placeholder="กรอกรหัสผ่านอีกครั้ง" required>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-user-plus"></i> สมัครสมาชิก
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-0">มีบัญชีแล้ว?</p>
+                        <a href="{% url 'login' %}" class="btn btn-outline-success mt-2">
+                            <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบที่นี่
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

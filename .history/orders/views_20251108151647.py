@@ -1,0 +1,243 @@
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Order
+from .serializers import OrderSerializer
+from users.permissions import IsSellerOrAdminUser  # นำเข้า permissions ใหม่
+
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        
+        if not user.is_authenticated:
+            return Order.objects.none()
+            
+        if user.is_admin() or user.is_seller():  # แก้ไข: Seller เห็นทั้งหมด
+            # Admin และ Seller เห็นทุกคำสั่งซื้อ
+            return Order.objects.all().select_related('user', 'pet')
+        else:
+            # Customer เห็นเฉพาะคำสั่งซื้อของตัวเอง
+            return Order.objects.filter(user=user).select_related('pet')
+    
+    def perform_create(self, serializer):
+        """Auto assign user และ validate ข้อมูล"""
+        if self.request.user.is_authenticated:
+            # ตรวจสอบว่ามีข้อมูลการจัดส่งครบถ้วน
+            delivery_method = serializer.validated_data.get('delivery_method', 'pickup')
+            recipient_name = serializer.validated_data.get('recipient_name', '')
+            
+            if not recipient_name:
+                # ถ้าไม่มีชื่อผู้รับ ให้ใช้ชื่อ user
+                recipient_name = self.request.user.get_full_name() or self.request.user.username
+                serializer.validated_data['recipient_name'] = recipient_name
+            
+            serializer.save(user=self.request.user)
+        else:
+            raise PermissionDenied("You must be logged in to create an order.")
+    
+    @action(detail=False, methods=['get'])
+    def user_orders(self, request):
+        """ดึงคำสั่งซื้อของผู้ใช้"""
+        if not request.user.is_authenticated:
+            raise PermissionDenied("You must be logged in to view orders.")
+            
+        if (request.user.is_admin() or request.user.is_seller()) and 'user_id' in request.GET:  # แก้ไข
+            # Admin และ Seller สามารถดูคำสั่งซื้อของ user อื่นได้
+            orders = Order.objects.filter(user_id=request.GET['user_id']).select_related('pet')
+        else:
+            orders = self.get_queryset()
+        
+        serializer = self.get_serializer(orders, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        """ยกเลิกคำสั่งซื้อ"""
+        order = self.get_object()
+        
+        # ตรวจสอบสิทธิ์ (เฉพาะเจ้าของหรือ admin/seller) - แก้ไข
+        if order.user != request.user and not (request.user.is_admin() or request.user.is_seller()):
+            raise PermissionDenied("You can only cancel your own orders.")
+        
+        if order.status == 'pending':
+            order.status = 'cancelled'
+            order.save()
+            serializer = self.get_serializer(order)
+            return Response(serializer.data)
+        else:
+            return Response(
+                {"error": "Cannot cancel order that is not pending"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsSellerOrAdminUser])
+    def update_status(self, request, pk=None):
+        """อัพเดทสถานะคำสั่งซื้อ (สำหรับ seller และ admin)"""
+        order = self.get_object()
+        
+        # ลบการตรวจสอบว่าเป็นสัตว์เลี้ยงของตัวเอง - Seller จัดการทั้งหมดได้
+        # if request.user.is_seller() and order.pet.created_by != request.user:
+        #     raise PermissionDenied("คุณไม่มีสิทธิ์อัพเดทคำสั่งซื้อนี้")
+        
+        new_status = request.data.get('status')
+        if new_status not in dict(Order.STATUS_CHOICES):
+            return Response(
+                {"error": "Invalid status"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        order.status = new_status
+        order.save()
+        serializer = self.get_serializer(order)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def seller_orders(self, request):
+        """ดึงคำสั่งซื้อสำหรับ seller (เห็นทั้งหมด)"""
+        if not request.user.is_authenticated:
+            raise PermissionDenied("You must be logged in to view orders.")
+        
+        if request.user.is_seller() or request.user.is_admin():  # แก้ไข: Seller เห็นทั้งหมด
+            orders = Order.objects.all().select_related('user', 'pet')  # แก้ไข: all() แทน filter
+            serializer = self.get_serializer(orders, many=True)
+            return Response(serializer.data)
+        else:
+            raise PermissionDenied("Only sellers can access this endpoint.")
+    
+    @action(detail=False, methods=['get'])
+    def stats(self, request):
+        """สถิติคำสั่งซื้อ"""
+        if not request.user.is_authenticated:
+            raise PermissionDenied("You must be logged in to view stats.")
+        
+        if request.user.is_admin() or request.user.is_seller():  # แก้ไข: Seller เห็นสถิติทั้งหมด
+            # Admin และ Seller เห็นสถิติทั้งหมด
+            total_orders = Order.objects.count()
+            pending_orders = Order.objects.filter(status='pending').count()
+            completed_orders = Order.objects.filter(status='completed').count()
+            cancelled_orders = Order.objects.filter(status='cancelled').count()
+        else:
+            # Customer เห็นเฉพาะของตัวเอง
+            total_orders = Order.objects.filter(user=request.user).count()
+            pending_orders = Order.objects.filter(user=request.user, status='pending').count()
+            completed_orders = Order.objects.filter(user=request.user, status='completed').count()
+            cancelled_orders = Order.objects.filter(user=request.user, status='cancelled').count()
+        
+        return Response({
+            'total_orders': total_orders,
+            'pending_orders': pending_orders,
+            'completed_orders': completed_orders,
+            'cancelled_orders': cancelled_orders,
+        })
+
+
+# เพิ่มฟังก์ชันสำหรับ HTML views
+@login_required
+def seller_dashboard(request):
+    """Dashboard สำหรับผู้ขาย - แสดงคำสั่งซื้อทั้งหมด"""
+    if not request.user.is_seller():
+        messages.error(request, "คุณไม่มีสิทธิ์เข้าถึงหน้านี้")
+        return redirect('home')
+    
+    # แสดงคำสั่งซื้อทั้งหมด
+    all_orders = Order.objects.all().select_related('user', 'pet').order_by('-order_date')
+    
+    # สถิติสำหรับผู้ขาย (เห็นทั้งหมด)
+    total_orders = Order.objects.count()  # แก้ไข: count() ทั้งหมด
+    pending_orders = Order.objects.filter(status='pending').count()  # แก้ไข: filter() ทั้งหมด
+    completed_orders = Order.objects.filter(status='completed').count()  # แก้ไข: filter() ทั้งหมด
+    cancelled_orders = Order.objects.filter(status='cancelled').count()  # แก้ไข: filter() ทั้งหมด
+    
+    # ส่ง STATUS_CHOICES ไปยัง template
+    status_choices = Order.STATUS_CHOICES
+    
+    return render(request, 'orders/seller_dashboard.html', {
+        'orders': all_orders,
+        'total_orders': total_orders,
+        'pending_orders': pending_orders,
+        'completed_orders': completed_orders,
+        'cancelled_orders': cancelled_orders,
+        'status_choices': status_choices,
+    })
+
+@login_required
+def update_order_status(request, order_id):
+    """อัพเดทสถานะคำสั่งซื้อ (สำหรับ seller - จัดการทั้งหมดได้)"""
+    order = get_object_or_404(Order, id=order_id)
+    
+    # ตรวจสอบสิทธิ์ - Seller จัดการทั้งหมดได้ (ลบการตรวจสอบสัตว์เลี้ยงของตัวเอง)
+    if not request.user.is_seller():
+        messages.error(request, "คุณไม่มีสิทธิ์อัพเดทคำสั่งซื้อนี้")
+        return redirect('seller_dashboard')
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(Order.STATUS_CHOICES):
+            order.status = new_status
+            order.save()
+            messages.success(request, f'อัพเดทสถานะคำสั่งซื้อ #{order.id} เป็น "{order.get_status_display()}" สำเร็จ')
+        else:
+            messages.error(request, 'สถานะไม่ถูกต้อง')
+    
+    return redirect('seller_dashboard')
+
+@login_required
+def update_order(request, order_id):
+    """แก้ไขคำสั่งซื้อทั้งหมด (สำหรับ seller - จัดการทั้งหมดได้)"""
+    order = get_object_or_404(Order, id=order_id)
+    
+    # ตรวจสอบสิทธิ์ - Seller จัดการทั้งหมดได้
+    if not request.user.is_seller():
+        messages.error(request, "คุณไม่มีสิทธิ์แก้ไขคำสั่งซื้อนี้")
+        return redirect('seller_dashboard')
+    
+    if request.method == 'POST':
+        try:
+            # อัพเดทข้อมูลทั้งหมด
+            order.quantity = int(request.POST.get('quantity', order.quantity))
+            order.status = request.POST.get('status', order.status)
+            order.delivery_method = request.POST.get('delivery_method', order.delivery_method)
+            order.recipient_name = request.POST.get('recipient_name', order.recipient_name)
+            
+            # จัดการ pickup_date (อาจเป็นค่าว่าง)
+            pickup_date = request.POST.get('pickup_date')
+            order.pickup_date = pickup_date if pickup_date else None
+            
+            order.save()
+            messages.success(request, f'อัพเดทคำสั่งซื้อ #{order.id} สำเร็จ')
+        except Exception as e:
+            messages.error(request, f'เกิดข้อผิดพลาด: {str(e)}')
+    
+    return redirect('seller_dashboard')
+
+@login_required
+def update_order_quantity(request, order_id):
+    """แก้ไขจำนวนอย่างรวดเร็ว (สำหรับ seller - จัดการทั้งหมดได้)"""
+    order = get_object_or_404(Order, id=order_id)
+    
+    # ตรวจสอบสิทธิ์ - Seller จัดการทั้งหมดได้
+    if not request.user.is_seller():
+        messages.error(request, "คุณไม่มีสิทธิ์แก้ไขคำสั่งซื้อนี้")
+        return redirect('seller_dashboard')
+    
+    if request.method == 'POST':
+        try:
+            quantity = int(request.POST.get('quantity', 1))
+            if quantity > 0:
+                order.quantity = quantity
+                order.save()
+                messages.success(request, f'อัพเดทจำนวนคำสั่งซื้อ #{order.id} เป็น {quantity} สำเร็จ')
+            else:
+                messages.error(request, 'จำนวนต้องมากกว่า 0')
+        except ValueError:
+            messages.error(request, 'จำนวนไม่ถูกต้อง')
+    
+    return redirect('seller_dashboard')

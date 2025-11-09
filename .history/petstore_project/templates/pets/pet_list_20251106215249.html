@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}สัตว์เลี้ยงทั้งหมด - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Sidebar Filters -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">ตัวกรอง</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">หมวดหมู่</label>
+                        <select class="form-select" id="category-filter">
+                            <option value="">ทั้งหมด</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">เพศ</label>
+                        <select class="form-select" id="gender-filter">
+                            <option value="">ทั้งหมด</option>
+                            <option value="M">ชาย</option>
+                            <option value="F">หญิง</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">ราคา</label>
+                        <input type="range" class="form-range" id="price-filter" min="0" max="100000" step="1000">
+                        <div class="d-flex justify-content-between">
+                            <small>0</small>
+                            <small id="price-value">50,000</small>
+                            <small>100,000</small>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary w-100" onclick="applyFilters()">ใช้ตัวกรอง</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <!-- Search Bar -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="search-input" placeholder="ค้นหาชื่อสัตว์เลี้ยง...">
+                        <button class="btn btn-primary" onclick="searchPets()">
+                            <i class="fas fa-search"></i> ค้นหา
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pets Grid -->
+            <div class="row" id="pets-grid">
+                <!-- จะถูกเติมด้วย JavaScript -->
+            </div>
+            
+            <!-- Loading -->
+            <div id="loading" class="text-center mt-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">กำลังโหลด...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/api.js"></script>
+<script>
+    let currentPage = 1;
+    let isLoading = false;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCategoriesFilter();
+        loadPets();
+        
+        // Infinite scroll
+        window.addEventListener('scroll', function() {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading) {
+                loadPets();
+            }
+        });
+    });
+    
+    async function loadCategoriesFilter() {
+        try {
+            const response = await fetch('/api/pets/categories/');
+            const categories = await response.json();
+            
+            const select = document.getElementById('category-filter');
+            select.innerHTML = '<option value="">ทั้งหมด</option>' + 
+                categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+        } catch (error) {
+            console.error('Error loading categories:', error);
+        }
+    }
+    
+    async function loadPets() {
+        if (isLoading) return;
+        
+        isLoading = true;
+        document.getElementById('loading').style.display = 'block';
+        
+        try {
+            const category = document.getElementById('category-filter').value;
+            const gender = document.getElementById('gender-filter').value;
+            const search = document.getElementById('search-input').value;
+            
+            let url = `/api/pets/pets/?page=${currentPage}&is_available=true`;
+            if (category) url += `&category=${category}`;
+            if (gender) url += `&gender=${gender}`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            
+            const response = await fetch(url);
+            const pets = await response.json();
+            
+            const container = document.getElementById('pets-grid');
+            
+            if (currentPage === 1) {
+                container.innerHTML = '';
+            }
+            
+            if (pets.length > 0) {
+                container.innerHTML += pets.map(pet => `
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100">
+                            <img src="${pet.image_display || '/static/images/default-pet.jpg'}" 
+                                 class="card-img-top" alt="${pet.name}" style="height: 250px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title">${pet.name}</h5>
+                                <p class="card-text">
+                                    <span class="badge bg-secondary">${pet.category_name}</span>
+                                    <span class="badge bg-info">${pet.gender === 'M' ? 'ชาย' : 'หญิง'}</span>
+                                </p>
+                                <p class="card-text">${pet.description.substring(0, 100)}...</p>
+                                <p class="card-text">
+                                    <strong class="text-primary">฿${parseFloat(pet.price).toLocaleString()}</strong>
+                                </p>
+                            </div>
+                            <div class="card-footer">
+                                <a href="/pets/${pet.id}/" class="btn btn-primary btn-sm">ดูรายละเอียด</a>
+                                <button class="btn btn-outline-success btn-sm" onclick="addToCart(${pet.id})">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                currentPage++;
+            } else if (currentPage === 1) {
+                container.innerHTML = '<div class="col-12 text-center"><p>ไม่พบสัตว์เลี้ยง</p></div>';
+            }
+        } catch (error) {
+            console.error('Error loading pets:', error);
+        } finally {
+            isLoading = false;
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+    
+    function applyFilters() {
+        currentPage = 1;
+        loadPets();
+    }
+    
+    function searchPets() {
+        currentPage = 1;
+        loadPets();
+    }
+    
+    function addToCart(petId) {
+        // ฟังก์ชันเพิ่มลงตะกร้า
+        alert('เพิ่มลงตะกร้าแล้ว!');
+    }
+</script>
+{% endblock %}

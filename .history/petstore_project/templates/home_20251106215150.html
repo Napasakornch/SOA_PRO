@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}หน้าแรก - Pet Store{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">ยินดีต้อนรับสู่ Pet Store</h1>
+                <p class="lead">ค้นหาสัตว์เลี้ยงน่ารักๆ ที่พร้อมจะเป็นส่วนหนึ่งในครอบครัวของคุณ</p>
+                <a href="{% url 'pet_list' %}" class="btn btn-light btn-lg mt-3">
+                    <i class="fas fa-search"></i> ค้นหาสัตว์เลี้ยง
+                </a>
+            </div>
+            <div class="col-lg-6">
+                <img src="/static/images/hero-pets.png" alt="Pets" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Pets -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">สัตว์เลี้ยงแนะนำ</h2>
+        <div class="row" id="featured-pets">
+            <!-- จะถูกเติมด้วย JavaScript -->
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">หมวดหมู่สัตว์เลี้ยง</h2>
+        <div class="row" id="categories-list">
+            <!-- จะถูกเติมด้วย JavaScript -->
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/api.js"></script>
+<script>
+    // โหลดสัตว์เลี้ยงแนะนำ
+    document.addEventListener('DOMContentLoaded', function() {
+        loadFeaturedPets();
+        loadCategories();
+    });
+
+    async function loadFeaturedPets() {
+        try {
+            const response = await fetch('/api/pets/pets/?is_available=true&limit=4');
+            const pets = await response.json();
+            
+            const container = document.getElementById('featured-pets');
+            container.innerHTML = pets.map(pet => `
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100">
+                        <img src="${pet.image_display || '/static/images/default-pet.jpg'}" 
+                             class="card-img-top" alt="${pet.name}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">${pet.name}</h5>
+                            <p class="card-text">${pet.category_name}</p>
+                            <p class="card-text">
+                                <strong class="text-primary">฿${parseFloat(pet.price).toLocaleString()}</strong>
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="/pets/${pet.id}/" class="btn btn-primary btn-sm">ดูรายละเอียด</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading featured pets:', error);
+        }
+    }
+
+    async function loadCategories() {
+        try {
+            const response = await fetch('/api/pets/categories/');
+            const categories = await response.json();
+            
+            const container = document.getElementById('categories-list');
+            container.innerHTML = categories.map(category => `
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">${category.name}</h5>
+                            <p class="card-text">${category.description || 'สัตว์เลี้ยงน่ารักๆ'}</p>
+                            <a href="/pets/category/${category.id}/" class="btn btn-outline-primary">ดูทั้งหมด</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading categories:', error);
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}คำสั่งซื้อ #{{ order.id }} - Pet Store{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">หน้าแรก</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'order_list' %}">คำสั่งซื้อของฉัน</a></li>
+            <li class="breadcrumb-item active">คำสั่งซื้อ #{{ order.id }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-receipt"></i> รายการสั่งซื้อ #{{ order.id }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>สินค้า</th>
+                                    <th>ราคา</th>
+                                    <th>จำนวน</th>
+                                    <th>รวม</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if order.pet.image %}
+                                                <img src="{{ order.pet.image.url }}" alt="{{ order.pet.name }}" 
+                                                     class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" 
+                                                     style="width: 60px; height: 60px;">
+                                                    <i class="fas fa-paw text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ order.pet.name }}</h6>
+                                                <small class="text-muted">{{ order.pet.category.name }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>฿{{ order.pet.price|floatformat:2 }}</td>
+                                    <td>{{ order.quantity }}</td>
+                                    <td>฿{{ order.total_price|floatformat:2 }}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>ยอดรวมทั้งสิ้น</strong></td>
+                                    <td><strong class="text-primary">฿{{ order.total_price|floatformat:2 }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> สถานะคำสั่งซื้อ
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <span class="badge bg-{{ order.status == 'completed'|yesno:'success,primary,warning' }} fs-6">
+                        {{ order.get_status_display }}
+                    </span>
+                    <div class="mt-3">
+                        <small class="text-muted">สั่งซื้อเมื่อ: {{ order.order_date|date:"d/m/Y H:i" }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">การดำเนินการ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'order_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left"></i> กลับไปหน้ารายการสั่งซื้อ
+                        </a>
+                        <button class="btn btn-outline-secondary" onclick="window.print()">
+                            <i class="fas fa-print"></i> พิมพ์ใบสั่งซื้อ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
