@@ -89,44 +89,9 @@ def login_view(request):
 def register_view(request):
     """หน้าสมัครสมาชิก"""
     if request.method == 'POST':
-        username = request.POST['username']
-        email = request.POST['email']
-        password = request.POST['password']
-        password2 = request.POST['password2']
-        first_name = request.POST.get('first_name', '')
-        last_name = request.POST.get('last_name', '')
-        phone = request.POST.get('phone', '')
-        
-        # Validation
-        if password != password2:
-            messages.error(request, 'รหัสผ่านไม่ตรงกัน')
-            return render(request, 'auth/register.html')
-        
-        # ตรวจสอบว่ามี username อยู่แล้วหรือไม่
-        from users.models import CustomUser
-        if CustomUser.objects.filter(username=username).exists():
-            messages.error(request, 'ชื่อผู้ใช้นี้มีอยู่แล้ว')
-            return render(request, 'auth/register.html')
-            
-        if CustomUser.objects.filter(email=email).exists():
-            messages.error(request, 'อีเมลนี้มีอยู่แล้ว')
-            return render(request, 'auth/register.html')
-        
-        try:
-            # สร้างผู้ใช้ใหม่
-            user = CustomUser.objects.create_user(
-                username=username,
-                email=email,
-                password=password,
-                first_name=first_name,
-                last_name=last_name,
-                phone=phone,
-                role='customer'  # ตั้งค่า role เป็น customer โดยอัตโนมัติ
-            )
-            messages.success(request, 'สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ')
-            return redirect('login')
-        except Exception as e:
-            messages.error(request, f'สมัครสมาชิกไม่สำเร็จ: {str(e)}')
+        # ควรเพิ่ม validation ที่นี่
+        messages.success(request, 'สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ')
+        return redirect('login')
     
     return render(request, 'auth/register.html')
 
@@ -144,6 +109,8 @@ def profile(request):
         'user_orders': user_orders
     })
 
+@login_required
+# petstore_project/views.py
 @login_required
 def order_list(request):
     """หน้ารายการคำสั่งซื้อ"""
@@ -183,7 +150,7 @@ def cart(request):
             'cart_count': 0,
             'cart_data_json': '[]',
             'clear_cart': True,
-            'today': datetime.now().date()
+            'today': datetime.now().date()  # ← เพิ่ม today context
         })
     
     # รับข้อมูล cart จาก query parameters (จะส่งมาจาก frontend)
@@ -220,7 +187,7 @@ def cart(request):
         'total_price': total_price,
         'cart_count': len(pets_in_cart),
         'cart_data_json': json.dumps(cart_data),
-        'today': datetime.now().date()
+        'today': datetime.now().date()  # ← เพิ่มบรรทัดนี้
     })
 
 @login_required
@@ -229,9 +196,9 @@ def create_order_from_cart(request):
     if request.method == 'POST':
         try:
             cart_data = json.loads(request.POST.get('cart', '[]'))
-            delivery_method = request.POST.get('delivery_method', 'pickup')
-            pickup_date = request.POST.get('pickup_date')
-            recipient_name = request.POST.get('recipient_name', '')
+            delivery_method = request.POST.get('delivery_method', 'pickup')  # ← รับข้อมูลใหม่
+            pickup_date = request.POST.get('pickup_date')  # ← รับข้อมูลใหม่
+            recipient_name = request.POST.get('recipient_name', '')  # ← รับข้อมูลใหม่
             
             created_orders = []
             for item in cart_data:
@@ -244,11 +211,6 @@ def create_order_from_cart(request):
                         messages.warning(request, f'{pet.name} ไม่พร้อมขายในขณะนี้')
                         continue
                     
-                    # ตรวจสอบสต็อก
-                    if pet.stock_quantity < quantity:
-                        messages.warning(request, f'{pet.name} สต็อกไม่พอ! มีเพียง {pet.stock_quantity} ตัว')
-                        continue
-                    
                     # สร้างคำสั่งซื้อพร้อมข้อมูลการรับสินค้า
                     order = Order.objects.create(
                         user=request.user,
@@ -256,9 +218,9 @@ def create_order_from_cart(request):
                         quantity=quantity,
                         total_price=pet.price * quantity,
                         status='pending',
-                        delivery_method=delivery_method,
-                        pickup_date=pickup_date if pickup_date else None,
-                        recipient_name=recipient_name or request.user.get_full_name() or request.user.username
+                        delivery_method=delivery_method,  # ← บันทึกข้อมูลใหม่
+                        pickup_date=pickup_date if pickup_date else None,  # ← บันทึกข้อมูลใหม่
+                        recipient_name=recipient_name or request.user.get_full_name() or request.user.username  # ← บันทึกข้อมูลใหม่
                     )
                     created_orders.append(order)
                     
@@ -269,7 +231,7 @@ def create_order_from_cart(request):
             if created_orders:
                 messages.success(request, f'สร้างคำสั่งซื้อสำเร็จ {len(created_orders)} รายการ')
                 # ล้างตะกร้าหลังสั่งซื้อสำเร็จ
-                request.session['order_created'] = True
+                request.session['order_created'] = True  # ← เปลี่ยนเป็น order_created
             else:
                 messages.warning(request, 'ไม่สามารถสร้างคำสั่งซื้อได้')
                 
@@ -287,7 +249,6 @@ def get_cart_data(request):
         # ในอนาคตอาจเก็บ cart ไว้ใน database
         return JsonResponse({'cart': []})
     return JsonResponse({'error': 'Unauthorized'}, status=401)
-
 @login_required
 def cancel_order(request, order_id):
     """ยกเลิกคำสั่งซื้อ"""
@@ -302,20 +263,3 @@ def cancel_order(request, order_id):
             messages.error(request, 'ไม่สามารถยกเลิกคำสั่งซื้อนี้ได้')
     
     return redirect('order_detail', order_id=order_id)
-
-# Error handlers
-def handler404(request, exception):
-    """Handle 404 errors"""
-    return render(request, 'errors/404.html', status=404)
-
-def handler500(request):
-    """Handle 500 errors"""
-    return render(request, 'errors/500.html', status=500)
-
-def handler403(request, exception):
-    """Handle 403 errors"""
-    return render(request, 'errors/403.html', status=403)
-
-def handler400(request, exception):
-    """Handle 400 errors"""
-    return render(request, 'errors/400.html', status=400)
