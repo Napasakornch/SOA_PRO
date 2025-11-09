@@ -263,3 +263,20 @@ def cancel_order(request, order_id):
             messages.error(request, 'ไม่สามารถยกเลิกคำสั่งซื้อนี้ได้')
     
     return redirect('order_detail', order_id=order_id)
+# เพิ่มฟังก์ชันเหล่านี้ที่ด้านล่างของไฟล์
+
+def handler404(request, exception):
+    """Handle 404 errors"""
+    return render(request, 'errors/404.html', status=404)
+
+def handler500(request):
+    """Handle 500 errors"""
+    return render(request, 'errors/500.html', status=500)
+
+def handler403(request, exception):
+    """Handle 403 errors"""
+    return render(request, 'errors/403.html', status=403)
+
+def handler400(request, exception):
+    """Handle 400 errors"""
+    return render(request, 'errors/400.html', status=400)
