@@ -48,7 +48,28 @@
                         </div>
                     </div>
                     
-                    
+                    <!-- Stock Status Filter -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">สถานะสต็อก</label>
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'pet_list' %}" 
+                               class="list-group-item list-group-item-action {% if not request.GET.stock %}active{% endif %}">
+                                สินค้าทั้งหมด
+                            </a>
+                            <a href="{% url 'pet_list' %}?stock=available" 
+                               class="list-group-item list-group-item-action {% if request.GET.stock == 'available' %}active{% endif %}">
+                                <span class="badge bg-success me-2">●</span> มีสต็อก
+                            </a>
+                            <a href="{% url 'pet_list' %}?stock=low" 
+                               class="list-group-item list-group-item-action {% if request.GET.stock == 'low' %}active{% endif %}">
+                                <span class="badge bg-warning me-2">●</span> สต็อกต่ำ
+                            </a>
+                            <a href="{% url 'pet_list' %}?stock=out" 
+                               class="list-group-item list-group-item-action {% if request.GET.stock == 'out' %}active{% endif %}">
+                                <span class="badge bg-danger me-2">●</span> สินค้าหมด
+                            </a>
+                        </div>
+                    </div>
                     
                     <!-- Quick Stats -->
                     <div class="mt-4">

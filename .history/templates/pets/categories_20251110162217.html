@@ -133,6 +133,9 @@
     .icon-bird { color: #45b7d1; }
     .icon-fish { color: #96ceb4; }
     .icon-reptile { color: #feca57; }
+    .icon-farm { color: #ff9ff3; }
+    .icon-aquatic { color: #54a0ff; }
+    .icon-rodent { color: #5f27cd; }
     .icon-default { color: #40916c; }
 </style>
 {% endblock %}
@@ -147,7 +150,7 @@
                     <i class="fas fa-paw me-3"></i>ค้นหาสัตว์เลี้ยงตามประเภท
                 </h1>
                 <p class="lead mb-4 opacity-90" style="font-size: 1.2rem;">
-                    ค้นพบสัตว์เลี้ยงน่ารักๆ จาก 5 หมวดหมู่หลัก 
+                    ค้นพบสัตว์เลี้ยงน่ารักๆ จากหลากหลายหมวดหมู่ 
                     พร้อมเป็นส่วนหนึ่งในครอบครัวของคุณ
                 </p>
                 <div class="d-flex flex-wrap gap-3">
@@ -171,7 +174,7 @@
     <div class="row mb-5">
         <div class="col-12">
             <h2 class="section-title">หมวดหมู่ทั้งหมด</h2>
-            <p class="text-muted mb-4">เลือกดูสัตว์เลี้ยงจาก 5 หมวดหมู่หลัก</p>
+            <p class="text-muted mb-4">เลือกดูสัตว์เลี้ยงตามประเภทที่คุณสนใจ</p>
         </div>
     </div>
 
@@ -182,16 +185,22 @@
                 <div class="card-body text-center p-4">
                     <!-- Category Icon -->
                     <div class="category-icon">
-                        {% if "สุนัข" in category.name %}
+                        {% if "สุนัข" in category.name or "Dog" in category.name or "dog" in category.name %}
                         <i class="fas fa-dog fa-4x icon-dog"></i>
-                        {% elif "แมว" in category.name %}
+                        {% elif "แมว" in category.name or "Cat" in category.name or "cat" in category.name %}
                         <i class="fas fa-cat fa-4x icon-cat"></i>
-                        {% elif "นก" in category.name %}
+                        {% elif "นก" in category.name or "Bird" in category.name or "bird" in category.name %}
                         <i class="fas fa-dove fa-4x icon-bird"></i>
-                        {% elif "ปลา" in category.name %}
+                        {% elif "ปลา" in category.name or "Fish" in category.name or "fish" in category.name %}
                         <i class="fas fa-fish fa-4x icon-fish"></i>
-                        {% elif "สัตว์เลื้อยคลาน" in category.name %}
+                        {% elif "สัตว์เลื้อยคลาน" in category.name or "Reptile" in category.name %}
                         <i class="fas fa-dragon fa-4x icon-reptile"></i>
+                        {% elif "สัตว์ฟาร์ม" in category.name or "Farm" in category.name %}
+                        <i class="fas fa-kiwi-bird fa-4x icon-farm"></i>
+                        {% elif "สัตว์น้ำ" in category.name or "Aquatic" in category.name %}
+                        <i class="fas fa-water fa-4x icon-aquatic"></i>
+                        {% elif "หนู" in category.name or "Rodent" in category.name %}
+                        <i class="fas fa-otter fa-4x icon-rodent"></i>
                         {% else %}
                         <i class="fas fa-paw fa-4x icon-default"></i>
                         {% endif %}
@@ -203,7 +212,7 @@
                     <!-- Category Description -->
                     {% if category.description %}
                     <p class="card-text text-muted mb-4">
-                        {{ category.description }}
+                        {{ category.description|truncatewords:12 }}
                     </p>
                     {% else %}
                     <p class="card-text text-muted mb-4">
@@ -216,12 +225,13 @@
                         {% with pet_count=category.pet_set.count %}
                         <span class="nature-badge">{{ pet_count }} ชนิด</span>
                         
-                        <!-- แสดงจำนวนสัตว์เลี้ยงที่พร้อมขายแบบง่าย -->
-                        {% if pet_count > 0 %}
-                        <span class="stats-badge ms-2">พร้อมขาย</span>
+                        {% with available_pets=category.pet_set.filter.is_available=True.count %}
+                        {% if available_pets > 0 %}
+                        <span class="stats-badge ms-2">{{ available_pets }} พร้อมขาย</span>
                         {% else %}
                         <span class="stats-badge ms-2">รอสินค้า</span>
                         {% endif %}
+                        {% endwith %}
                         {% endwith %}
                     </div>
                     
@@ -259,6 +269,70 @@
     </div>
 </div>
 
+<!-- Admin Management Section -->
+{% if user.is_staff or user.is_admin %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card admin-card">
+                <div class="card-header bg-transparent border-bottom-0 pt-4">
+                    <h4 class="card-title mb-0 d-flex align-items-center" style="color: #2d6a4f;">
+                        <i class="fas fa-tools me-3"></i>
+                        การจัดการหมวดหมู่
+                        <small class="text-muted ms-2">(สำหรับผู้ดูแลระบบ)</small>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="d-grid">
+                                <a href="/admin/pets/category/" class="btn btn-nature">
+                                    <i class="fas fa-list me-2"></i>
+                                    ดูหมวดหมู่ทั้งหมด
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-grid">
+                                <a href="/admin/pets/category/add/" class="btn btn-outline-nature">
+                                    <i class="fas fa-plus-circle me-2"></i>
+                                    เพิ่มหมวดหมู่ใหม่
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-grid">
+                                <a href="/admin/pets/pet/add/" class="btn btn-outline-nature">
+                                    <i class="fas fa-paw me-2"></i>
+                                    เพิ่มสัตว์เลี้ยง
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Category Management -->
+                    {% if categories %}
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="text-muted mb-3">
+                            <i class="fas fa-bolt me-2"></i>จัดการหมวดหมู่ด่วน:
+                        </h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for category in categories|slice:":6" %}
+                            <a href="/admin/pets/category/{{ category.id }}/change/" 
+                               class="btn btn-sm stats-badge" style="text-decoration: none;">
+                                <i class="fas fa-edit me-1"></i> {{ category.name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Call to Action -->
 <div class="container">
     <div class="row mt-5">
@@ -266,7 +340,7 @@
             <div class="cta-section">
                 <div class="text-center">
                     <h3 class="mb-3">พร้อมที่จะค้นหาสัตว์เลี้ยงน่ารักแล้วหรือยัง?</h3>
-                    <p class="mb-4 opacity-90">ค้นพบสัตว์เลี้ยงที่สมบูรณ์แบบจาก 5 หมวดหมู่หลัก</p>
+                    <p class="mb-4 opacity-90">ค้นพบสัตว์เลี้ยงที่สมบูรณ์แบบสำหรับคุณและครอบครัว</p>
                     <div class="d-flex flex-wrap gap-3 justify-content-center">
                         <a href="{% url 'pet_list' %}" class="btn btn-light btn-lg">
                             <i class="fas fa-search me-2"></i>ดูสัตว์เลี้ยงทั้งหมด

@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}หน้าแรก - Pet Store{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">ยินดีต้อนรับสู่ Pet Store</h1>
+                <p class="lead">ค้นหาสัตว์เลี้ยงน่ารักๆ ที่พร้อมจะเป็นส่วนหนึ่งในครอบครัวของคุณ</p>
+                <div class="mt-4">
+                    <a href="{% url 'pet_list' %}" class="btn btn-light btn-lg me-3">
+                        <i class="fas fa-search"></i> ค้นหาสัตว์เลี้ยง
+                    </a>
+                    <a href="{% url 'categories' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-list"></i> ดูหมวดหมู่
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="row">
+                    <div class="col-6">
+                        <i class="fas fa-dog" style="font-size: 80px; opacity: 0.8; margin-bottom: 20px;"></i>
+                        <h5>สุนัข</h5>
+                    </div>
+                    <div class="col-6">
+                        <i class="fas fa-cat" style="font-size: 80px; opacity: 0.8; margin-bottom: 20px;"></i>
+                        <h5>แมว</h5>
+                    </div>
+                    <div class="col-6">
+                        <i class="fas fa-dove" style="font-size: 80px; opacity: 0.8; margin-bottom: 20px;"></i>
+                        <h5>นก</h5>
+                    </div>
+                    <div class="col-6">
+                        <i class="fas fa-fish" style="font-size: 80px; opacity: 0.8; margin-bottom: 20px;"></i>
+                        <h5>ปลา</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Pets -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">สัตว์เลี้ยงแนะนำ</h2>
+        {% if featured_pets %}
+        <div class="row">
+            <!-- ในส่วน Featured Pets ของ home.html -->
+{% for pet in featured_pets %}
+<div class="col-lg-3 col-md-6 mb-4">
+    <div class="card h-100">
+        {% if pet.image_display %}
+            <img src="{{ pet.image_display }}" class="card-img-top pet-image" 
+                 alt="{{ pet.name }}" style="height: 200px; object-fit: cover;"
+                 onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='">
+        {% else %}
+            <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
+                <i class="fas fa-paw fa-3x text-muted"></i>
+            </div>
+        {% endif %}
+        <div class="card-body">
+            <h5 class="card-title">{{ pet.name }}</h5>
+            <p class="card-text">
+                <span class="badge bg-secondary">{{ pet.category.name }}</span>
+                <span class="badge {% if pet.gender == 'M' %}bg-info{% else %}bg-pink{% endif %}">
+                    {% if pet.gender == 'M' %}ชาย{% else %}หญิง{% endif %}
+                </span>
+            </p>
+            <p class="card-text">
+                <strong class="text-primary">฿{{ pet.price|floatformat:2 }}</strong>
+            </p>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'pet_detail' pet.id %}" class="btn btn-primary btn-sm">ดูรายละเอียด</a>
+        </div>
+    </div>
+</div>
+{% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'pet_list' %}" class="btn btn-outline-primary">ดูสัตว์เลี้ยงทั้งหมด</a>
+        </div>
+        {% else %}
+        <div class="text-center">
+            <p class="text-muted">ยังไม่มีสัตว์เลี้ยงในระบบ</p>
+            <a href="/admin/pets/pet/add/" class="btn btn-primary">เพิ่มสัตว์เลี้ยงแรก</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">หมวดหมู่สัตว์เลี้ยง</h2>
+        {% if categories %}
+        <div class="row">
+            {% for category in categories %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <p class="card-text">{{ category.description|default:"สัตว์เลี้ยงน่ารักๆ" }}</p>
+                        <a href="{% url 'pet_list' %}?category={{ category.id }}" class="btn btn-outline-primary">ดูทั้งหมด</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">ทำไมต้องเลือกเรา</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-heartbeat fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">สัตว์เลี้ยงสุขภาพดี</h5>
+                        <p class="card-text">สัตว์เลี้ยงทุกตัวมาจากฟาร์มที่ได้มาตรฐาน ผ่านการตรวจสุขภาพอย่างเคร่งครัดจากสัตวแพทย์</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-shipping-fast fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">จัดส่งรวดเร็ว</h5>
+                        <p class="card-text">จัดส่งปลอดภัยถึงบ้านทั่วประเทศ ด้วยระบบขนส่งพิเศษสำหรับสัตว์เลี้ยง</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">บริการหลังการขาย</h5>
+                        <p class="card-text">ทีมสัตวแพทย์พร้อมให้คำปรึกษาตลอด 24 ชั่วโมง ในช่วง 7 วันแรก</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

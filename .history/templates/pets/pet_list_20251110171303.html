@@ -1,0 +1,585 @@
+{% extends 'base.html' %}
+
+{% block title %}สัตว์เลี้ยงทั้งหมด - Pet Store{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-card {
+        background: white;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(45, 106, 79, 0.08);
+        border-left: 4px solid #a8d5ba;
+    }
+    
+    .filter-header {
+        background: linear-gradient(135deg, #a8d5ba 0%, #c8e6c9 100%);
+        color: #2d6a4f;
+        border-radius: 15px 15px 0 0 !important;
+        border: none;
+        font-weight: 600;
+    }
+    
+    .pet-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(45, 106, 79, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        background: white;
+    }
+    
+    .pet-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(45, 106, 79, 0.15);
+    }
+    
+    .pet-image {
+        transition: transform 0.3s ease;
+        height: 250px;
+        object-fit: cover;
+    }
+    
+    .pet-card:hover .pet-image {
+        transform: scale(1.05);
+    }
+    
+    .stock-badge {
+        border-radius: 15px;
+        padding: 6px 12px;
+        font-size: 0.75em;
+        font-weight: 600;
+    }
+    
+    .stock-available {
+        background: linear-gradient(45deg, #a8d5ba, #c8e6c9);
+        color: #2d6a4f;
+    }
+    
+    .stock-low {
+        background: linear-gradient(45deg, #ffd166, #ffd93d);
+        color: #2d6a4f;
+    }
+    
+    .stock-out {
+        background: linear-gradient(45deg, #ffafcc, #ffb3c6);
+        color: #2d6a4f;
+    }
+    
+    .gender-badge-male {
+        background: linear-gradient(45deg, #a8d5ba, #8fc9a8);
+        color: #2d6a4f;
+        border-radius: 15px;
+        padding: 4px 10px;
+        font-size: 0.7em;
+        font-weight: 600;
+    }
+    
+    .gender-badge-female {
+        background: linear-gradient(45deg, #ffafcc, #ffb3c6);
+        color: #2d6a4f;
+        border-radius: 15px;
+        padding: 4px 10px;
+        font-size: 0.7em;
+        font-weight: 600;
+    }
+    
+    .category-badge {
+        background: linear-gradient(45deg, #a8d5ba, #c8e6c9);
+        color: #2d6a4f;
+        border-radius: 15px;
+        padding: 4px 12px;
+        font-size: 0.75em;
+        font-weight: 600;
+    }
+    
+    .price-tag {
+        color: #2d6a4f;
+        font-weight: 700;
+        font-size: 1.3em;
+    }
+    
+    .btn-nature-light {
+        background: linear-gradient(45deg, #a8d5ba, #c8e6c9);
+        border: none;
+        color: #2d6a4f;
+        font-weight: 600;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-nature-light:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(168, 213, 186, 0.3);
+        color: #2d6a4f;
+        background: linear-gradient(45deg, #c8e6c9, #a8d5ba);
+    }
+    
+    .btn-outline-nature-light {
+        border: 2px solid #a8d5ba;
+        color: #2d6a4f;
+        font-weight: 600;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-nature-light:hover {
+        background: #a8d5ba;
+        color: #2d6a4f;
+        transform: translateY(-2px);
+    }
+    
+    .filter-item {
+        border: none;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+        background: #f8fdfa;
+        color: #2d6a4f;
+        font-weight: 500;
+    }
+    
+    .filter-item:hover {
+        background: #e8f5e8;
+        transform: translateX(5px);
+        color: #2d6a4f;
+    }
+    
+    .filter-item.active {
+        background: linear-gradient(45deg, #a8d5ba, #c8e6c9);
+        color: #2d6a4f;
+        font-weight: 600;
+    }
+    
+    .search-box {
+        border: 2px solid #e8f5e8;
+        border-radius: 25px;
+        padding: 12px 20px;
+        transition: all 0.3s ease;
+        background: #f8fdfa;
+    }
+    
+    .search-box:focus {
+        border-color: #a8d5ba;
+        box-shadow: 0 0 0 0.2rem rgba(168, 213, 186, 0.25);
+        background: white;
+    }
+    
+    .stats-badge {
+        background: linear-gradient(45deg, #a8d5ba, #c8e6c9);
+        color: #2d6a4f;
+        border-radius: 20px;
+        padding: 8px 15px;
+        font-size: 0.8em;
+        font-weight: 600;
+    }
+    
+    .empty-state {
+        background: linear-gradient(135deg, #f8fdfa 0%, #e8f5e8 100%);
+        border-radius: 20px;
+        padding: 60px 20px;
+    }
+    
+    .section-title {
+        color: #2d6a4f;
+        font-weight: 700;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(45deg, #a8d5ba, #c8e6c9);
+        border-radius: 2px;
+    }
+    
+    .quick-actions-header {
+        background: linear-gradient(135deg, #c8e6c9 0%, #d8eddb 100%);
+        color: #2d6a4f;
+        border-radius: 15px 15px 0 0 !important;
+        border: none;
+        font-weight: 600;
+    }
+    
+    .text-nature {
+        color: #2d6a4f;
+    }
+    
+    .bg-nature-light {
+        background: #f8fdfa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h2 class="section-title">
+                <i class="fas fa-paw me-2"></i> สัตว์เลี้ยงทั้งหมด
+            </h2>
+            <p class="text-muted fs-5">ค้นพบเพื่อนรักที่เหมาะกับไลฟ์สไตล์ของคุณ</p>
+        </div>
+        <div class="col-md-4">
+            <form method="get" class="d-flex">
+                <input type="text" class="form-control search-box me-2" name="search" 
+                       placeholder="ค้นหาชื่อสัตว์เลี้ยง..." value="{{ search_query }}">
+                <button type="submit" class="btn btn-nature-light">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-md-3">
+            <!-- Filter Card -->
+            <div class="card filter-card mb-4">
+                <div class="card-header filter-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-filter me-2"></i> ตัวกรองค้นหา
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Category Filter -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-nature">หมวดหมู่</label>
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'pet_list' %}" 
+                               class="list-group-item filter-item {% if not selected_category %}active{% endif %}">
+                                <i class="fas fa-th-large me-2"></i>ทั้งหมด
+                            </a>
+                            {% for category in categories %}
+                            <a href="{% url 'pet_list' %}?category={{ category.id }}" 
+                               class="list-group-item filter-item {% if selected_category == category.id|stringformat:'i' %}active{% endif %}">
+                                <i class="fas fa-paw me-2"></i>{{ category.name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Stock Status Filter -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-nature">สถานะสต็อก</label>
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'pet_list' %}" 
+                               class="list-group-item filter-item {% if not request.GET.stock %}active{% endif %}">
+                                <i class="fas fa-boxes me-2"></i>สินค้าทั้งหมด
+                            </a>
+                            <a href="{% url 'pet_list' %}?stock=available" 
+                               class="list-group-item filter-item {% if request.GET.stock == 'available' %}active{% endif %}">
+                                <i class="fas fa-check-circle me-2"></i>มีสต็อก
+                            </a>
+                            <a href="{% url 'pet_list' %}?stock=low" 
+                               class="list-group-item filter-item {% if request.GET.stock == 'low' %}active{% endif %}">
+                                <i class="fas fa-exclamation-triangle me-2"></i>สต็อกต่ำ
+                            </a>
+                            <a href="{% url 'pet_list' %}?stock=out" 
+                               class="list-group-item filter-item {% if request.GET.stock == 'out' %}active{% endif %}">
+                                <i class="fas fa-times-circle me-2"></i>สินค้าหมด
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="mt-4 p-3 rounded bg-nature-light">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-nature">พบสัตว์เลี้ยง</small>
+                            <span class="stats-badge">{{ pets.count }} ตัว</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-success">
+                                <i class="fas fa-check-circle me-1"></i>พร้อมขาย
+                            </small>
+                            <small class="fw-bold text-nature">{{ available_count }} ตัว</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card filter-card">
+                <div class="card-header quick-actions-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i> การดำเนินการด่วน
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/admin/pets/pet/add/" class="btn btn-nature-light btn-sm">
+                            <i class="fas fa-plus me-2"></i> เพิ่มสัตว์เลี้ยง
+                        </a>
+                        <a href="/admin/pets/pet/" class="btn btn-outline-nature-light btn-sm">
+                            <i class="fas fa-cog me-2"></i> จัดการสัตว์เลี้ยง
+                        </a>
+                        {% if user.is_seller or user.is_admin %}
+                        <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-nature-light btn-sm">
+                            <i class="fas fa-chart-bar me-2"></i> แดชบอร์ด
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pets Grid -->
+        <div class="col-md-9">
+            {% if pets %}
+            <div class="row">
+                {% for pet in pets %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 pet-card">
+                        <!-- Pet Image -->
+                        <div class="position-relative overflow-hidden">
+                            {% if pet.image_display %}
+                                <img src="{{ pet.image_display }}" class="card-img-top pet-image" 
+                                     alt="{{ pet.name }}"
+                                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='">
+                            {% else %}
+                                <div class="card-img-top d-flex align-items-center justify-content-center" 
+                                     style="height: 250px; background: linear-gradient(135deg, #e8f5e8, #d8eddb);">
+                                    <i class="fas fa-paw fa-3x" style="color: #a8d5ba;"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Stock Status Badge -->
+                            <div class="position-absolute top-0 end-0 m-2">
+                                {% if pet.stock_quantity > 10 %}
+                                <span class="stock-badge stock-available">
+                                    <i class="fas fa-boxes me-1"></i> มีสต็อก
+                                </span>
+                                {% elif pet.stock_quantity > 0 %}
+                                <span class="stock-badge stock-low">
+                                    <i class="fas fa-exclamation-triangle me-1"></i> สต็อกต่ำ
+                                </span>
+                                {% else %}
+                                <span class="stock-badge stock-out">
+                                    <i class="fas fa-times-circle me-1"></i> สินค้าหมด
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Gender Badge -->
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <span class="{% if pet.gender == 'M' %}gender-badge-male{% else %}gender-badge-female{% endif %}">
+                                    <i class="fas fa-{% if pet.gender == 'M' %}mars{% else %}venus{% endif %} me-1"></i>
+                                    {% if pet.gender == 'M' %}ชาย{% else %}หญิง{% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <!-- Category -->
+                            <div class="mb-2">
+                                <span class="category-badge">{{ pet.category.name }}</span>
+                            </div>
+                            
+                            <!-- Pet Name -->
+                            <h5 class="card-title fw-bold text-nature">{{ pet.name }}</h5>
+                            
+                            <!-- Stock Quantity -->
+                            <div class="mb-2">
+                                {% if pet.stock_quantity > 0 %}
+                                <small class="text-muted">
+                                    <i class="fas fa-box me-1"></i>
+                                    <strong>จำนวนคงเหลือ:</strong> {{ pet.stock_quantity }} ตัว
+                                </small>
+                                {% else %}
+                                <small class="text-danger">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    <strong>สินค้าหมดชั่วคราว</strong>
+                                </small>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Description (Short) -->
+                            <p class="card-text text-muted small flex-grow-1">
+                                {{ pet.description|truncatewords:15 }}
+                            </p>
+                            
+                            <!-- Price -->
+                            <div class="mt-auto">
+                                <h4 class="price-tag mb-3">฿{{ pet.price|floatformat:2 }}</h4>
+                                
+                                <!-- Action Buttons -->
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'pet_detail' pet.id %}" class="btn btn-outline-nature-light btn-sm">
+                                        <i class="fas fa-eye me-2"></i> ดูรายละเอียด
+                                    </a>
+                                    
+                                    {% if pet.stock_quantity > 0 %}
+                                        {% if user.is_authenticated %}
+                                            <button class="btn btn-nature-light btn-sm add-to-cart-btn" 
+                                                    data-pet-id="{{ pet.id }}"
+                                                    data-pet-name="{{ pet.name }}"
+                                                    data-max-quantity="{{ pet.stock_quantity }}">
+                                                <i class="fas fa-cart-plus me-2"></i> เพิ่มลงตะกร้า
+                                            </button>
+                                        {% else %}
+                                            <a href="{% url 'login' %}?next={% url 'pet_list' %}" class="btn btn-nature-light btn-sm">
+                                                <i class="fas fa-sign-in-alt me-2"></i> ล็อกอินเพื่อซื้อ
+                                            </a>
+                                        {% endif %}
+                                    {% else %}
+                                        <button class="btn btn-secondary btn-sm" disabled>
+                                            <i class="fas fa-times-circle me-2"></i> สินค้าหมด
+                                        </button>
+                                        {% if user.is_seller or user.is_admin %}
+                                        <a href="/admin/pets/pet/{{ pet.id }}/change/" class="btn btn-outline-nature-light btn-sm">
+                                            <i class="fas fa-edit me-2"></i> เพิ่มสต็อก
+                                        </a>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Card Footer -->
+                        <div class="card-footer bg-transparent border-top-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ pet.created_at|date:"d/m/Y" }}
+                                </small>
+                                {% if not pet.image_display %}
+                                <small class="text-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    ไม่มีรูป
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-5 empty-state">
+                <i class="fas fa-search fa-4x mb-3" style="color: #a8d5ba;"></i>
+                <h4 class="text-nature mb-3">ไม่พบสัตว์เลี้ยง</h4>
+                <p class="text-muted mb-4">ลองเปลี่ยนคำค้นหาหรือตัวกรองดูนะคะ</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{% url 'pet_list' %}" class="btn btn-nature-light">
+                        <i class="fas fa-refresh me-2"></i> โหลดสัตว์เลี้ยงทั้งหมด
+                    </a>
+                    <a href="/admin/pets/pet/add/" class="btn btn-outline-nature-light">
+                        <i class="fas fa-plus me-2"></i> เพิ่มสัตว์เลี้ยง
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add to cart function with stock validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+        
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const petId = this.dataset.petId;
+                const petName = this.dataset.petName;
+                const maxQuantity = parseInt(this.dataset.maxQuantity);
+                
+                let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                const existingItem = cart.find(item => item.petId === parseInt(petId));
+                
+                // Check if adding would exceed stock
+                const currentQuantity = existingItem ? existingItem.quantity : 0;
+                if (currentQuantity >= maxQuantity) {
+                    showToast(`ไม่สามารถเพิ่มได้! ${petName} เหลือเพียง ${maxQuantity} ตัว`, 'warning');
+                    return;
+                }
+                
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({ 
+                        petId: parseInt(petId), 
+                        quantity: 1,
+                        petName: petName,
+                        maxQuantity: maxQuantity,
+                        addedAt: new Date().toISOString()
+                    });
+                }
+                
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartCount();
+                
+                // Show success toast
+                showToast(`เพิ่ม ${petName} ลงตะกร้าเรียบร้อย! (${currentQuantity + 1}/${maxQuantity})`, 'success');
+            });
+        });
+        
+        // Handle image loading errors
+        const images = document.querySelectorAll('.pet-image');
+        images.forEach(img => {
+            img.addEventListener('error', function() {
+                this.onerror = null;
+                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+            });
+        });
+    });
+    
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        
+        // Update cart badge if exists
+        const cartBadge = document.querySelector('.cart-badge');
+        if (cartBadge) {
+            cartBadge.textContent = totalItems;
+            cartBadge.style.display = totalItems > 0 ? 'inline' : 'none';
+        }
+    }
+    
+    function showToast(message, type) {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-2"></i>${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        // Add to toast container
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        toastContainer.appendChild(toast);
+        
+        // Initialize and show toast
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Remove toast after hide
+        toast.addEventListener('hidden.bs.toast', function () {
+            toast.remove();
+        });
+    }
+
+    // Initialize cart count on page load
+    document.addEventListener('DOMContentLoaded', updateCartCount);
+</script>
+{% endblock %}
